@@ -1,0 +1,441 @@
+/*
+insn_gen.c, Copyright © 2009 William Astle
+
+This file is part of LWASM.
+
+LWASM is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+
+Contains code for parsing general addressing modes (IMM+DIR+EXT+IND)
+*/
+
+#include <ctype.h>
+#include <stdlib.h>
+
+#include <lw_expr.h>
+
+#include "lwasm.h"
+#include "instab.h"
+
+extern void insn_indexed_parse_aux(asmstate_t *as, line_t *l, char **p);
+extern void insn_indexed_resolve_aux(asmstate_t *as, line_t *l, int force, int elen);
+extern void insn_indexed_emit_aux(asmstate_t *as, line_t *l);
+
+// "extra" is required due to the way OIM, EIM, TIM, and AIM work
+void insn_parse_gen_aux(asmstate_t *as, line_t *l, char **p)
+{
+	const char *optr2;
+	int v1, tv, rval;
+	lw_expr_t s;
+
+	optr2 = *p;
+	while (*optr2 && !isspace(*optr2) && *optr2 != ',') optr2++
+		/* do nothing */ ;
+
+	if (*optr2 == ',' || **p == '[')
+	{
+		l -> lint = -1;
+		l -> lint2 = 1;
+		insn_parse_indexed_aux(as, l, p);
+		goto out;
+	}
+
+	if (**p == '<')
+	{
+		(*p)++;
+		l -> lint2 = 0;
+	}
+
+	// for compatibility with asxxxx
+	// * followed by a digit, alpha, or _, or ., or ?, or another * is "f8"
+	else if (**p == '*')
+	{
+		tv = *(*p + 1);
+		if (isdigit(tv) || isalpha(tv) || tv == '_' || tv == '.' || tv == '?' || tv == '@' || tv == '*' || tv == '+' || tv == '-')
+		{
+			l -> lint2 = 0;
+			(*p)++;
+		}
+	}
+	else if (**p == '>')
+	{
+		(*p)++;
+		l -> lint2 = 2;
+	}
+	else
+	{
+		l -> lint2 = -1;
+	}
+
+	s = lwasm_parse_expr(as, p);
+	if (!s)
+	{
+		lwasm_register_error(as, l, "Bad operand");
+		return;
+	}
+	
+	lwasm_save_expr(l, 0, s);
+
+	if (as -> output_format == OUTPUT_OBJ && l -> lint2 == -1)
+	{
+		l -> lint2 = 2;
+		goto out;
+	}
+
+	if (l -> lint2 != -1)
+		goto out;
+
+	// if we have a constant now, figure out dp vs nondp
+	if (lw_expr_istype(s, lw_expr_type_int))
+	{
+		v1 = lw_expr_intval(s);
+		if (((v1 >> 8) & 0xff) == (l -> dpval & 0xff))
+		{
+			l -> lint2 = 0;
+			goto out;
+		}
+		l -> lint2 = 2;
+	}
+
+out:
+	if (l -> lint2 != -1)
+	{
+		if (l -> lint2 == 0)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		}
+		else if (l -> lint2 == 2)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[2]) + 2;
+		}
+		else if (l -> lint2 == 1 && l -> lint != -1)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[1]) + l -> lint + 1;
+		}
+	}
+}
+
+void insn_resolve_gen_aux(asmstate_t *as, line_t *l, int force, int elen)
+{
+	lw_expr_t e;
+	
+	if (l -> lint2 == 1)
+	{
+		// indexed
+		insn_resolve_indexed_aux(as, l, force, elen);
+		goto out;
+	}
+	
+	if (l -> lint2 != -1)
+		return;
+	
+	e = lwasm_fetch_expr(l, 0);
+	if (lw_expr_istype(e, lw_expr_type_int))
+	{
+		int v;
+		
+		v = lw_expr_intval(e);
+
+		if (((v >> 8) & 0xff) == (l -> dpval & 0xff))
+		{
+			l -> lint2 = 0;
+			goto out;
+		}
+		l -> lint2 = 2;
+		goto out;
+	}
+
+	if (force)
+	{
+		l -> lint2 = 2;
+	}
+
+out:
+	if (l -> lint2 != -1)
+	{
+		if (l -> lint2 == 0)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		}
+		else if (l -> lint2 == 2)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[2]) + 2;
+		}
+		else if (l -> lint2 == 1 && l -> lint != -1)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[1]) + l -> lint + 1;
+		}
+	}
+}
+
+void insn_emit_gen_aux(asmstate_t *as, line_t *l, int extra)
+{
+	lw_expr_t e;
+	
+	e = lwasm_fetch_expr(l, 0);
+	lwasm_emitop(l, instab[l -> insn].ops[l -> lint2]);
+	
+	if (extra != -1)
+		lwasm_emit(l, extra);
+	
+	if (l -> lint2 == 1)
+	{
+		lwasm_emit(l, l -> pb);
+		if (l -> lint > 0)
+			lwasm_emitexpr(l, e, l -> lint);
+		return;
+	}
+	
+	if (l -> lint2 == 2)
+		lwasm_emitexpr(l, e, 2);
+	else
+		lwasm_emitexpr(l, e, 1);
+}
+
+// the various insn_gen? functions have an immediate mode of ? bits
+PARSEFUNC(insn_parse_gen0)
+{
+	if (**p == '#')
+	{
+		lwasm_register_error(as, l, "Immediate mode not allowed");
+		return;
+	}
+	
+	// handle non-immediate
+	insn_parse_gen_aux(as, l, p);
+}
+
+RESOLVEFUNC(insn_resolve_gen0)
+{
+	if (l -> len != -1)
+		return;
+
+	// handle non-immediate
+	insn_resolve_gen_aux(as, l, force, 0);
+}
+
+EMITFUNC(insn_emit_gen0)
+{
+	insn_emit_gen_aux(as, l, -1);
+}
+
+PARSEFUNC(insn_parse_gen8)
+{
+	if (**p == '#')
+	{
+		lw_expr_t e;
+		
+		(*p)++;
+		e = lwasm_parse_expr(as, p);
+		if (!e)
+		{
+			lwasm_register_error(as, l, "Bad operand");
+			return;
+		}
+		l -> len = OPLEN(instab[l -> insn].ops[3]) + 1;
+		l -> lint2 = 3;
+		lwasm_save_expr(l, 0, e);
+		return;
+	}
+	
+	// handle non-immediate
+	insn_parse_gen_aux(as, l, p);
+	if (l -> lint2 != -1)
+	{
+		if (l -> lint2 == 0)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		}
+		else if (l -> lint2 == 2)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[2]) + 2;
+		}
+		else if (l -> lint2 == 1 && l -> lint != -1)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[1]) + l -> lint + 1;
+		}
+	}
+}
+
+RESOLVEFUNC(insn_resolve_gen8)
+{
+	if (l -> len != -1)
+		return;
+
+	// handle non-immediate
+	insn_resolve_gen_aux(as, l, force, 0);
+}
+
+EMITFUNC(insn_emit_gen8)
+{
+	if (l -> lint2 == 3)
+	{
+		lw_expr_t e;
+		e = lwasm_fetch_expr(l, 0);
+		lwasm_emitop(l, instab[l -> insn].ops[3]);
+		lwasm_emitexpr(l, e, 1);
+		return;
+	}
+
+	insn_emit_gen_aux(as, l, -1);
+}
+
+PARSEFUNC(insn_parse_gen16)
+{
+	if (**p == '#')
+	{
+		lw_expr_t e;
+		
+		(*p)++;
+		e = lwasm_parse_expr(as, p);
+		if (!e)
+		{
+			lwasm_register_error(as, l, "Bad operand");
+			return;
+		}
+		l -> len = OPLEN(instab[l -> insn].ops[3]) + 2;
+		l -> lint2 = 3;
+		lwasm_save_expr(l, 0, e);
+		return;
+	}
+	
+	// handle non-immediate
+	insn_parse_gen_aux(as, l, p);
+	if (l -> lint2 != -1)
+	{
+		if (l -> lint2 == 0)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		}
+		else if (l -> lint2 == 2)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[2]) + 2;
+		}
+		else if (l -> lint2 == 1 && l -> lint != -1)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[1]) + l -> lint + 1;
+		}
+	}
+}
+
+RESOLVEFUNC(insn_resolve_gen16)
+{
+	if (l -> len != -1)
+		return;
+
+	// handle non-immediate
+	insn_resolve_gen_aux(as, l, force, 0);
+}
+
+EMITFUNC(insn_emit_gen16)
+{
+	if (l -> lint2 == 3)
+	{
+		lw_expr_t e;
+		e = lwasm_fetch_expr(l, 0);
+		lwasm_emitop(l, instab[l -> insn].ops[3]);
+		lwasm_emitexpr(l, e, 2);
+		return;
+	}
+
+	insn_emit_gen_aux(as, l, -1);
+}
+
+PARSEFUNC(insn_parse_gen32)
+{
+	if (**p == '#')
+	{
+		lw_expr_t e;
+		
+		(*p)++;
+		e = lwasm_parse_expr(as, p);
+		if (!e)
+		{
+			lwasm_register_error(as, l, "Bad operand");
+			return;
+		}
+		l -> len = OPLEN(instab[l -> insn].ops[3]) + 4;
+		l -> lint2 = 3;
+		lwasm_save_expr(l, 0, e);
+		return;
+	}
+	
+	// handle non-immediate
+	insn_parse_gen_aux(as, l, p);
+	if (l -> lint2 != -1)
+	{
+		if (l -> lint2 == 0)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		}
+		else if (l -> lint2 == 2)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[2]) + 2;
+		}
+		else if (l -> lint2 == 1 && l -> lint != -1)
+		{
+			l -> len = OPLEN(instab[l -> insn].ops[1]) + l -> lint + 1;
+		}
+	}
+}
+
+RESOLVEFUNC(insn_resolve_gen32)
+{
+	if (l -> len != -1)
+		return;
+
+	// handle non-immediate
+	insn_resolve_gen_aux(as, l, force, 0);
+}
+
+EMITFUNC(insn_emit_gen32)
+{
+	if (l -> lint2 == 3)
+	{
+		lw_expr_t e;
+		e = lwasm_fetch_expr(l, 0);
+		lwasm_emitop(l, instab[l -> insn].ops[3]);
+		lwasm_emitexpr(l, e, 4);
+		return;
+	}
+
+	insn_emit_gen_aux(as, l, -1);
+}
+
+PARSEFUNC(insn_parse_imm8)
+{
+	lw_expr_t e;
+	
+	if (**p == '#')
+	{
+		(*p)++;
+
+		e = lwasm_parse_expr(as, p);
+		if (!e)
+		{
+			lwasm_register_error(as, l, "Bad operand");
+			return;
+		}
+		l -> len = OPLEN(instab[l -> insn].ops[0]) + 1;
+		lwasm_save_expr(l, 0, e);
+	}
+}
+
+EMITFUNC(insn_emit_imm8)
+{
+	lw_expr_t e;
+	
+	lwasm_emitop(l, instab[l -> insn].ops[0]);
+	e = lwasm_fetch_expr(l, 0);
+	lwasm_emitexpr(l, e, 1);
+}

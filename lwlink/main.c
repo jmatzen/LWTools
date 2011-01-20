@@ -1,0 +1,194 @@
+/*
+main.c
+Copyright © 2009 William Astle
+
+This file is part of LWLINK.
+
+LWLINK is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+Implements the program startup code
+
+*/
+
+#include <argp.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "lwlink.h"
+
+char *program_name;
+
+// command line option handling
+const char *argp_program_version = "LWLINK from " PACKAGE_STRING;
+const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+
+static error_t parse_opts(int key, char *arg, struct argp_state *state)
+{
+	switch (key)
+	{
+	case 'o':
+		// output
+		outfile = arg;
+		break;
+	
+	case 's':
+		// script file
+		scriptfile = arg;
+		break;
+
+	case 'd':
+		// debug
+		debug_level++;
+		break;
+	
+	case 'b':
+		// decb output
+		outformat = OUTPUT_DECB;
+		break;
+	
+	case 'r':
+		// raw binary output
+		outformat = OUTPUT_RAW;
+		break;
+	
+	case 'f':
+		// output format
+		if (!strcasecmp(arg, "decb"))
+			outformat = OUTPUT_DECB;
+		else if (!strcasecmp(arg, "raw"))
+			outformat = OUTPUT_RAW;
+		else if (!strcasecmp(arg, "lwex0") || !strcasecmp(arg, "lwex"))
+			outformat = OUTPUT_LWEX0;
+		else
+		{
+			fprintf(stderr, "Invalid output format: %s\n", arg);
+			exit(1);
+		}
+		break;
+	case ARGP_KEY_END:
+		// done; sanity check
+		if (!outfile)
+			outfile = "a.out";
+		break;
+	
+	case 'l':
+		add_input_library(arg);
+		break;
+	
+	case 'L':
+		add_library_search(arg);
+		break;
+	
+	case 0x100:
+		add_section_base(arg);
+		break;
+	
+	case 'm':
+		map_file = arg;
+		break;
+	
+	case ARGP_KEY_ARG:
+		add_input_file(arg);
+		break;
+		
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+	return 0;
+}
+
+static struct argp_option options[] =
+{
+	{ "output",		'o',	"FILE",	0,
+				"Output to FILE"},
+	{ "debug",		'd',	0,		0,
+				"Set debug mode"},
+	{ "format",		'f',	"TYPE",	0,
+				"Select output format: decb, raw, lwex"},
+	{ "decb",		'b',	0,		0,
+				"Generate DECB .bin format output, equivalent of --format=decb"},
+	{ "raw",		'r',	0,		0,
+				"Generate raw binary format output, equivalent of --format=raw"},
+	{ "script",		's',	"FILE",		0,
+				"Specify the linking script (overrides the built in defaults)"},
+	{ "library",	'l',	"LIBSPEC",	0,
+				"Read library libLIBSPEC.a from the search path" },
+	{ "library-path", 'L',	"DIR",		0,
+				"Add DIR to the library search path" },
+	{ "section-base", 0x100,	"SECT=BASE",	0,
+				"Load section SECT at BASE" },
+	{ "map",		'm',	"FILE",		0,
+				"Output informaiton about the link" },
+	{ 0 }
+};
+
+static struct argp argp =
+{
+	options,
+	parse_opts,
+	"<input file> ...",
+	"LWLINK, a HD6309 and MC6809 cross-linker"
+};
+
+extern void read_files(void);
+extern void setup_script(void);
+extern void resolve_files(void);
+extern void resolve_sections(void);
+extern void resolve_references(void);
+extern void do_output(void);
+extern void display_map(void);
+
+// main function; parse command line, set up assembler state, and run the
+// assembler on the first file
+int main(int argc, char **argv)
+{
+	program_name = argv[0];
+
+	argp_parse(&argp, argc, argv, 0, 0, NULL);
+	if (ninputfiles == 0)
+	{
+		fprintf(stderr, "No input files\n");
+		exit(1);
+	}
+
+	unlink(outfile);
+
+	// handle the linker script
+	setup_script();
+
+	// read the input files
+	read_files();
+
+	// trace unresolved references and determine which non-forced
+	// objects must be included
+	resolve_files();
+	
+	// resolve section bases and section order
+	resolve_sections();
+	
+	// resolve incomplete references
+	resolve_references();
+	
+	// do the actual output
+	do_output();
+
+	// display/output the link map
+	if (map_file)
+		display_map();
+
+	exit(0);
+}
