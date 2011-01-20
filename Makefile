@@ -1,5 +1,3 @@
-CC := gcc
-
 CPPFLAGS += -I lwlib -DPACKAGE_STRING='"lwtools 4.0-pre"' -DPACKAGE_BUGREPORT='"lost@l-w.ca"'
 
 LDFLAGS += -L$(PWD)/lwlib -llw
