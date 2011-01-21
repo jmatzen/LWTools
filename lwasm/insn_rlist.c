@@ -22,6 +22,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 for handling inherent mode instructions
 */
 
+#include <ctype.h>
+
 #include "lwasm.h"
 #include "instab.h"
 

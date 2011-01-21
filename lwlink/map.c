@@ -24,6 +24,7 @@ Output information about the linking process
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lwlink.h"
 #include "util.h"
@@ -67,7 +68,7 @@ void display_map(void)
 	for (sn = 0; sn < nsects; sn++)
 	{
 		fprintf(of, "Section: %s (%s) load at %04X, length %04X\n",
-				sanitize_symbol(sectlist[sn].ptr -> name),
+				sanitize_symbol((char*)(sectlist[sn].ptr -> name)),
 				sectlist[sn].ptr -> file -> filename,
 				sectlist[sn].ptr -> loadaddress,
 				sectlist[sn].ptr -> codesize
@@ -81,7 +82,7 @@ void display_map(void)
 		{
 			for (pe = NULL, ce = slist; ce; ce = ce -> next)
 			{
-				i = strcmp(ce -> name, sym -> sym);
+				i = strcmp(ce -> name, (char *)(sym -> sym));
 				if (i == 0)
 				{
 					i = strcmp(ce -> fn, sectlist[sn].ptr -> file -> filename);
@@ -94,7 +95,7 @@ void display_map(void)
 			ne -> ext = 0;
 			ne -> addr = sym -> offset + sectlist[sn].ptr -> loadaddress;
 			ne -> next = ce;
-			ne -> name = sym -> sym;
+			ne -> name = (char *)(sym -> sym);
 			ne -> fn = sectlist[sn].ptr -> file -> filename;
 			if (pe)
 				pe -> next = ne;

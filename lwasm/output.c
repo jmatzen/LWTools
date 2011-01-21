@@ -342,8 +342,8 @@ int write_code_obj_expraux(lw_expr_t e, void *of)
 				writebytes(se -> symbol, strlen(se -> symbol), 1, of);
 				if (se -> context != -1)
 				{
-					sprintf(buf, "\x01%d", se -> context);
-					writebytes(buf, strlen(buf), 1, of);
+					sprintf((char *)buf, "\x01%d", se -> context);
+					writebytes(buf, strlen((char *)buf), 1, of);
 				}
 				writebytes("", 1, 1, of);
 				return 0;
@@ -470,8 +470,8 @@ void write_code_obj(asmstate_t *as, FILE *of)
 			if (se -> context >= 0)
 			{
 				writebytes("\x01", 1, 1, of);
-				sprintf(buf, "%d", se -> context);
-				writebytes(buf, strlen(buf), 1, of);
+				sprintf((char *)buf, "%d", se -> context);
+				writebytes(buf, strlen((char *)buf), 1, of);
 			}
 			// the "" is NOT an error
 			writebytes("", 1, 1, of);

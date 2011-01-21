@@ -19,6 +19,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdlib.h>
+#include <ctype.h>
 
 #include <lw_expr.h>
 
@@ -30,8 +31,8 @@ PARSEFUNC(insn_parse_bitbit)
 {
 	int r;
 	lw_expr_t e;
-	int v1;
-	int tv;
+//	int v1;
+//	int tv;
 
 	r = toupper(*(*p)++);
 	if (r == 'A')

@@ -55,7 +55,7 @@ void lw_stack_destroy(lw_stack_t S)
 {
 	void *d;
 	
-	while (d = lw_stack_pop(S))
+	while ((d = lw_stack_pop(S)))
 		(S->freefn)(d);
 	lw_free(S);
 }

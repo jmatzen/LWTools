@@ -31,11 +31,14 @@ extern void insn_indexed_parse_aux(asmstate_t *as, line_t *l, char **p);
 extern void insn_indexed_resolve_aux(asmstate_t *as, line_t *l, int force, int elen);
 extern void insn_indexed_emit_aux(asmstate_t *as, line_t *l);
 
+extern void insn_parse_indexed_aux(asmstate_t *as, line_t *l, char **p);
+extern void insn_resolve_indexed_aux(asmstate_t *as, line_t *l, int force, int elen);
+
 // "extra" is required due to the way OIM, EIM, TIM, and AIM work
 void insn_parse_gen_aux(asmstate_t *as, line_t *l, char **p)
 {
 	const char *optr2;
-	int v1, tv, rval;
+	int v1, tv;
 	lw_expr_t s;
 
 	optr2 = *p;

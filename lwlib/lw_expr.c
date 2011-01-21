@@ -22,6 +22,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define ___lw_expr_c_seen___
 #include "lw_alloc.h"
@@ -111,7 +112,7 @@ void lw_expr_destroy(lw_expr_t E)
 void lw_expr_add_operand(lw_expr_t E, lw_expr_t O);
 lw_expr_t lw_expr_copy(lw_expr_t E)
 {
-	lw_expr_t r, t;
+	lw_expr_t r;
 	struct lw_expr_opers *o;
 	
 	r = lw_alloc(sizeof(struct lw_expr_priv));
@@ -610,14 +611,12 @@ again:
 	// merge plus operations
 	if (E -> value == lw_expr_oper_plus)
 	{
-		lw_expr_t e2;
-
 	tryagainplus:
 		for (o = E -> operands; o; o = o -> next)
 		{
 			if (o -> p -> type == lw_expr_type_oper && o -> p -> value == lw_expr_oper_plus)
 			{
-				struct lw_expr_opers *o2, *o3;
+				struct lw_expr_opers *o2;
 				// we have a + operation - bring operands up
 				
 				for (o2 = E -> operands; o2 && o2 -> next != o; o2 = o2 -> next)
@@ -640,14 +639,12 @@ again:
 	// merge times operations
 	if (E -> value == lw_expr_oper_times)
 	{
-		lw_expr_t e2;
-
 	tryagaintimes:
 		for (o = E -> operands; o; o = o -> next)
 		{
 			if (o -> p -> type == lw_expr_type_oper && o -> p -> value == lw_expr_oper_times)
 			{
-				struct lw_expr_opers *o2, *o3;
+				struct lw_expr_opers *o2;
 				// we have a + operation - bring operands up
 				
 				for (o2 = E -> operands; o2 && o2 -> next != o; o2 = o2 -> next)

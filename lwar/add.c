@@ -25,6 +25,7 @@ Implements the program startup code
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lwar.h"
 

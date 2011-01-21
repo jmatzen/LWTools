@@ -63,11 +63,11 @@ static int exprok(asmstate_t *as, lw_expr_t e)
 
 void do_pass5(asmstate_t *as)
 {
-	int rc;
+//	int rc;
 	int cnt;
 	int ocnt;
 	line_t *cl, *sl;
-	struct line_expr_s *le;
+//	struct line_expr_s *le;
 
 	// first, count the number of non-constant addresses; do
 	// a reduction first on each one

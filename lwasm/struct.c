@@ -80,9 +80,9 @@ void pseudo_endstruct_aux(asmstate_t *as, line_t *l, structtab_field_t *e, const
 	while (e)
 	{
 		if (e -> name)
-			0 == asprintf(&symname, "%s.%s", prefix, e -> name);
+			(void)(0 == asprintf(&symname, "%s.%s", prefix, e -> name));
 		else
-			0 == asprintf(&symname, "%s.____%d", prefix, *coff);
+			(void)(0 == asprintf(&symname, "%s.____%d", prefix, *coff));
 		
 		// register the symbol
 		te1 = lw_expr_build(lw_expr_type_int, *coff);
@@ -94,7 +94,7 @@ void pseudo_endstruct_aux(asmstate_t *as, line_t *l, structtab_field_t *e, const
 		if (e -> substruct)
 		{
 			char *t;
-			0 == asprintf(&t, "sizeof{%s}", symname);
+			(void)(0 == asprintf(&t, "sizeof{%s}", symname));
 			te1 = lw_expr_build(lw_expr_type_int, e -> substruct -> size);
 			register_symbol(as, l, t, te1, symbol_flag_nocheck);
 			lw_expr_destroy(te1);
@@ -123,7 +123,7 @@ PARSEFUNC(pseudo_parse_endstruct)
 		return;
 	}
 	
-	0 == asprintf(&t, "sizeof{%s}", as -> cstruct -> name);
+	(void)(0 == asprintf(&t, "sizeof{%s}", as -> cstruct -> name));
 	te = lw_expr_build(lw_expr_type_int, as -> cstruct -> size);
 	register_symbol(as, l, t, te, symbol_flag_nocheck);
 	lw_expr_destroy(te);
@@ -188,22 +188,22 @@ int expand_struct(asmstate_t *as, line_t *l, char **p, char *opc)
 	if (!(l -> sym))
 	{
 		lwasm_register_error(as, l, "Cannot declare a structure without a symbol name.");
-		return;
+		return -1;
 	}
 	
 	l -> len = s -> size;
 
 	if (as -> instruct)
-		0 == asprintf(&t, "sizeof(%s.%s}", as -> cstruct -> name, l -> sym);
+		(void)(0 == asprintf(&t, "sizeof(%s.%s}", as -> cstruct -> name, l -> sym));
 	else
-		0 == asprintf(&t, "sizeof{%s}", l -> sym);
+		(void)(0 == asprintf(&t, "sizeof{%s}", l -> sym));
 	te = lw_expr_build(lw_expr_type_int, s -> size);
 	register_symbol(as, l, t, te, symbol_flag_nocheck);
 	lw_expr_destroy(te);
 	lw_free(t);
 	
 	if (as -> instruct)
-		0 == asprintf(&t, "%s.%s", as -> cstruct -> name, l -> sym);
+		(void)(0 == asprintf(&t, "%s.%s", as -> cstruct -> name, l -> sym));
 	else
 		t = lw_strdup(l -> sym);
 	pseudo_endstruct_aux(as, l, s -> fields, t, &addr);

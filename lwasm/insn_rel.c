@@ -31,9 +31,9 @@ for handling relative mode instructions
 
 PARSEFUNC(insn_parse_rel8)
 {
-	int v;
+//	int v;
 	lw_expr_t t, e1, e2;
-	int r;
+//	int r;
 
 	// sometimes there is a "#", ignore if there
 	if (**p == '#')
@@ -80,9 +80,9 @@ EMITFUNC(insn_emit_rel8)
 
 PARSEFUNC(insn_parse_rel16)
 {
-	int v;
+//	int v;
 	lw_expr_t t, e1, e2;
-	int r;
+//	int r;
 
 	// sometimes there is a "#", ignore if there
 	if (**p == '#')
@@ -107,7 +107,7 @@ PARSEFUNC(insn_parse_rel16)
 EMITFUNC(insn_emit_rel16)
 {
 	lw_expr_t e;
-	int offs;
+//	int offs;
 	
 	e = lwasm_fetch_expr(l, 0);
 	

@@ -294,12 +294,12 @@ void read_lwobj16v0(fileinfo_t *fn)
 				
 				case 0x02:
 					// external symbol reference
-					term = lw_expr_term_create_sym(CURSTR(), 0);
+					term = lw_expr_term_create_sym((char *)CURSTR(), 0);
 					break;
 					
 				case 0x03:
 					// internal symbol reference
-					term = lw_expr_term_create_sym(CURSTR(), 1);
+					term = lw_expr_term_create_sym((char *)CURSTR(), 1);
 					break;
 				
 				case 0x04:
@@ -413,7 +413,7 @@ void read_lwar1v(fileinfo_t *fn)
 		memset(fn -> subs[fn -> nsubs], 0, sizeof(fileinfo_t));
 		fn -> subs[fn -> nsubs] -> filedata = fn -> filedata + cc;
 		fn -> subs[fn -> nsubs] -> filesize = flen;
-		fn -> subs[fn -> nsubs] -> filename = lw_strdup(fn -> filedata + l);
+		fn -> subs[fn -> nsubs] -> filename = lw_strdup((char *)(fn -> filedata + l));
 		fn -> subs[fn -> nsubs] -> parent = fn;
 		fn -> subs[fn -> nsubs] -> forced = fn -> forced;		
 		read_file(fn -> subs[fn -> nsubs]);

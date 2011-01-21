@@ -23,6 +23,7 @@ A standalone program to dump an object file in a text form to stdout
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "util.h"
 
@@ -76,7 +77,6 @@ making additional copies.
 */
 int main(int argc, char **argv)
 {
-	int i;
 	long size;
 	FILE *f;
 	long bread;
@@ -220,7 +220,7 @@ void read_lwobj16v0(unsigned char *filedata, long filesize)
 			NEXTBYTE();
 			// val is now the symbol value
 			
-			printf("        %s=%04X\n", string_cleanup(fp), val);
+			printf("        %s=%04X\n", string_cleanup((char *)fp), val);
 			
 		}
 		// skip terminating NUL
@@ -240,7 +240,7 @@ void read_lwobj16v0(unsigned char *filedata, long filesize)
 			NEXTBYTE();
 			// val is now the symbol value
 			
-			printf("        %s=%04X\n", string_cleanup(fp), val);
+			printf("        %s=%04X\n", string_cleanup((char *)fp), val);
 		}
 		// skip terminating NUL
 		NEXTBYTE();
@@ -272,12 +272,12 @@ void read_lwobj16v0(unsigned char *filedata, long filesize)
 				
 				case 0x02:
 					// external symbol reference
-					printf(" ES=%s", string_cleanup(CURSTR()));
+					printf(" ES=%s", string_cleanup((char *)CURSTR()));
 					break;
 					
 				case 0x03:
 					// internal symbol reference
-					printf(" IS=%s", string_cleanup(CURSTR()));
+					printf(" IS=%s", string_cleanup((char *)CURSTR()));
 					break;
 				
 				case 0x04:

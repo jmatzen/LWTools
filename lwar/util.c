@@ -52,7 +52,7 @@ void *lw_realloc(void *optr, int size)
 	if (size == 0)
 	{
 		lw_free(optr);
-		return;
+		return NULL;
 	}
 	
 	ptr = realloc(optr, size);
@@ -61,6 +61,7 @@ void *lw_realloc(void *optr, int size)
 		fprintf(stderr, "lw_realloc(): memory allocation error\n");
 		exit(1);
 	}
+	return ptr;
 }
 
 void lw_free(void *ptr)

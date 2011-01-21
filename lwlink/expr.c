@@ -194,7 +194,7 @@ further operators or only a single term remains
 */
 int lw_expr_reval(lw_expr_stack_t *s, lw_expr_stack_t *(*sfunc)(char *sym, int stype, void *state), void *state)
 {
-	lw_expr_stack_node_t *n, *n2;
+	lw_expr_stack_node_t *n;
 	lw_expr_stack_t *ss;
 	int c;
 	

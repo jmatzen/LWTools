@@ -23,6 +23,7 @@ Resolve section and symbol addresses; handle incomplete references
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "expr.h"
 #include "lwlink.h"
@@ -41,7 +42,7 @@ void check_section_name(char *name, int *base, fileinfo_t *fn)
 
 	for (sn = 0; sn < fn -> nsections; sn++)
 	{
-		if (!strcmp(name, fn -> sections[sn].name))
+		if (!strcmp(name, (char *)(fn -> sections[sn].name)))
 		{
 			// we have a match
 			sectlist = lw_realloc(sectlist, sizeof(struct section_list) * (nsects + 1));
@@ -73,14 +74,14 @@ void check_section_flags(int yesflags, int noflags, int *base, fileinfo_t *fn)
 		if (noflags && (fn -> sections[sn].flags & noflags))
 			continue;
 		// ignore unless the yesflags tell us not to
-		if (yesflags && (fn -> sections[sn].flags & yesflags == 0))
+		if (yesflags && ((fn -> sections[sn].flags & yesflags) == 0))
 			continue;
 		// ignore it if already processed
 		if (fn -> sections[sn].processed)
 			continue;
 
 		// we have a match - now collect *all* sections of the same name!
-		add_matching_sections(fn -> sections[sn].name, 0, 0, base);
+		add_matching_sections((char *)(fn -> sections[sn].name), 0, 0, base);
 		
 		// and then continue looking for sections
 	}
@@ -154,16 +155,16 @@ void resolve_sections(void)
 					if (linkscript.lines[ln].noflags && (inputfiles[fn0] -> sections[sn0].flags & linkscript.lines[ln].noflags))
 						continue;
 					// ignore unless the yes flags tell us not to
-					if (linkscript.lines[ln].yesflags && (inputfiles[fn0] -> sections[sn0].flags & linkscript.lines[ln].yesflags == 0))
+					if (linkscript.lines[ln].yesflags && ((inputfiles[fn0] -> sections[sn0].flags & linkscript.lines[ln].yesflags) == 0))
 						continue;
 					if (inputfiles[fn0] -> sections[sn0].processed == 0)
 					{
-						sname = inputfiles[fn0] -> sections[sn0].name;
+						sname = (char *)(inputfiles[fn0] -> sections[sn0].name);
 						for (fn = 0; fn < ninputfiles; fn++)
 						{
 							for (sn = 0; sn < inputfiles[fn] -> nsections; sn++)
 							{
-								if (!strcmp(sname, inputfiles[fn] -> sections[sn].name))
+								if (!strcmp(sname, (char *)(inputfiles[fn] -> sections[sn].name)))
 								{
 									// we have a match
 									sectlist = lw_realloc(sectlist, sizeof(struct section_list) * (nsects + 1));
@@ -207,7 +208,7 @@ lw_expr_stack_t *find_external_sym_recurse(char *sym, fileinfo_t *fn)
 	{
 		for (se = fn -> sections[sn].exportedsyms; se; se = se -> next)
 		{
-			if (!strcmp(sym, se -> sym))
+			if (!strcmp(sym, (char *)(se -> sym)))
 			{
 				if (!(fn -> forced))
 				{
@@ -264,7 +265,7 @@ lw_expr_stack_t *resolve_sym(char *sym, int symtype, void *state)
 		// start with this section
 		for (se = sect -> localsyms; se; se = se -> next)
 		{
-			if (!strcmp(se -> sym, sym))
+			if (!strcmp((char *)(se -> sym), sym))
 			{
 				val = se -> offset + sect -> loadaddress;
 				goto out;
@@ -275,7 +276,7 @@ lw_expr_stack_t *resolve_sym(char *sym, int symtype, void *state)
 		{
 			for (se = sect -> file -> sections[i].localsyms; se; se = se -> next)
 			{
-				if (!strcmp(se -> sym, sym))
+				if (!strcmp((char *)(se -> sym), sym))
 				{
 					val = se -> offset + sect -> file -> sections[i].loadaddress;
 					goto out;

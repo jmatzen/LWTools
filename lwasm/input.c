@@ -32,6 +32,8 @@ less difficult.
 #include <lw_alloc.h>
 #include <lw_stringlist.h>
 #include <lw_string.h>
+#include <lw_error.h>
+
 #include "lwasm.h"
 
 /*
@@ -82,7 +84,7 @@ void input_pushpath(asmstate_t *as, char *fn)
 	
 	/* also add it to the list of files included */
 	char *dn, *dp;
-	int o;
+//	int o;
 
 	dn = lw_strdup(fn);
 	lw_stack_push(as -> includelist, dn);
@@ -177,7 +179,7 @@ void input_open(asmstate_t *as, char *s)
 		
 		/* relative path, check relative to "current file" directory */
 		p = lw_stack_top(as -> file_dir);
-		0 == asprintf(&p2, "%s/%s", p, s);
+		(void)(0 == asprintf(&p2, "%s/%s", p, s));
 		debug_message(as, 1, "Open: (cd) %s\n", p2);
 		IS -> data = fopen(p2, "rb");
 		if (IS -> data)
@@ -191,9 +193,9 @@ void input_open(asmstate_t *as, char *s)
 
 		/* now check relative to entries in the search path */
 		lw_stringlist_reset(as -> include_list);
-		while (p = lw_stringlist_current(as -> include_list))
+		while ((p = lw_stringlist_current(as -> include_list)))
 		{
-			0 == asprintf(&p2, "%s/%s", p, s);
+			(void)(0 == asprintf(&p2, "%s/%s", p, s));
 		debug_message(as, 1, "Open (sp): %s\n", p2);
 			IS -> data = fopen(p2, "rb");
 			if (IS -> data)
@@ -226,7 +228,7 @@ void input_open(asmstate_t *as, char *s)
 
 FILE *input_open_standalone(asmstate_t *as, char *s)
 {
-	char *s2;
+//	char *s2;
 	FILE *fp;
 	char *p, *p2;
 
@@ -245,7 +247,7 @@ FILE *input_open_standalone(asmstate_t *as, char *s)
 
 	/* relative path, check relative to "current file" directory */
 	p = lw_stack_top(as -> file_dir);
-	0 == asprintf(&p2, "%s/%s", p, s);
+	(void)(0 == asprintf(&p2, "%s/%s", p, s));
 	debug_message(as, 2, "Open file (st cd) %s", p2);
 	fp = fopen(p2, "rb");
 	if (fp)
@@ -257,9 +259,9 @@ FILE *input_open_standalone(asmstate_t *as, char *s)
 
 	/* now check relative to entries in the search path */
 	lw_stringlist_reset(as -> include_list);
-	while (p = lw_stringlist_current(as -> include_list))
+	while ((p = lw_stringlist_current(as -> include_list)))
 	{
-		0 == asprintf(&p2, "%s/%s", p, s);
+		(void)(0 == asprintf(&p2, "%s/%s", p, s));
 		debug_message(as, 2, "Open file (st ip) %s", p2);
 		fp = fopen(p2, "rb");
 		if (fp)
@@ -402,6 +404,7 @@ nextfile:
 	
 	default:
 		lw_error("Problem reading from unknown input type");
+		return NULL;
 	}
 }
 

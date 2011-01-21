@@ -135,7 +135,7 @@ whitespace ends argument list but can be included with "\ " or the like
 int expand_macro(asmstate_t *as, line_t *l, char **p, char *opc)
 {
 	int lc;
-	line_t *cl, *nl;
+	line_t *cl; //, *nl;
 	int oldcontext;
 	macrotab_t *m;
 

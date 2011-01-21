@@ -34,9 +34,9 @@ Various debug utilities
 void dump_state(asmstate_t *as)
 {
 	line_t *cl;
-	exportlist_t *ex;
-	struct symtabe *s;
-	importlist_t *im;
+//	exportlist_t *ex;
+//	struct symtabe *s;
+//	importlist_t *im;
 	struct line_expr_s *le;
 	lwasm_error_t *e;
 	

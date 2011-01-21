@@ -314,7 +314,7 @@ void insn_resolve_indexed_aux(asmstate_t *as, line_t *l, int force, int elen)
 {
 	// here, we have an expression which needs to be
 	// resolved; the post byte is determined here as well
-	lw_expr_t e, e2, e3;
+	lw_expr_t e, e2;
 	int pb = -1;
 	int v;
 	
@@ -414,7 +414,7 @@ void insn_resolve_indexed_aux(asmstate_t *as, line_t *l, int force, int elen)
 				}	
 				else
 				{
-					pb = (l -> pb & 0x03) << 5 | v & 0x1F;
+					pb = (l -> pb & 0x03) << 5 | (v & 0x1F);
 				}
 				l -> pb = pb;
 				return;
@@ -499,7 +499,7 @@ void insn_resolve_indexed_aux(asmstate_t *as, line_t *l, int force, int elen)
 			}
 			else
 			{
-				pb = (l -> pb & 0x03) << 5 | v & 0x1F;
+				pb = (l -> pb & 0x03) << 5 | (v & 0x1F);
 			}
 			l -> pb = pb;
 			return;

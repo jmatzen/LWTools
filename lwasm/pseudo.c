@@ -20,6 +20,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <ctype.h>
+
+#include <lw_alloc.h>
 
 #include "lwasm.h"
 #include "instab.h"
@@ -101,7 +104,7 @@ EMITFUNC(pseudo_emit_fcb)
 {
 	int i;
 	lw_expr_t e;
-	int v;
+//	int v;
 	
 	for (i = 0; i < l -> len; i++)
 	{
@@ -136,7 +139,7 @@ EMITFUNC(pseudo_emit_fdb)
 {
 	int i;
 	lw_expr_t e;
-	int v;
+//	int v;
 	
 	for (i = 0; i < (l -> len)/2; i++)
 	{
@@ -171,7 +174,7 @@ EMITFUNC(pseudo_emit_fqb)
 {
 	int i;
 	lw_expr_t e;
-	int v;
+//	int v;
 	
 	for (i = 0; i < (l -> len)/4; i++)
 	{
@@ -1056,7 +1059,7 @@ PARSEFUNC(pseudo_parse_include)
 	if (delim && **p)
 		(*p)++;
 	
-	0 == asprintf(&p3, "include:%s", fn);
+	(void)(0 == asprintf(&p3, "include:%s", fn));
 	input_open(as, p3);
 	lw_free(p3);
 

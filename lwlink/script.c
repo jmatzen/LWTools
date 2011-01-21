@@ -21,6 +21,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 Read and parse linker scripts
 */
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

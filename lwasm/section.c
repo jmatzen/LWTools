@@ -20,6 +20,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <string.h>
+#include <ctype.h>
 
 #include <lw_string.h>
 #include <lw_alloc.h>
@@ -292,7 +293,7 @@ PARSEFUNC(pseudo_parse_extdep)
 {
 	int after = 0;
 	char *sym = NULL;
-	importlist_t *e;
+//	importlist_t *e;
 	
 	if (as -> output_format != OUTPUT_OBJ)
 	{

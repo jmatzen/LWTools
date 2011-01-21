@@ -21,6 +21,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 #include <lw_alloc.h>
 #include <lw_string.h>
@@ -31,6 +33,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 extern int expand_macro(asmstate_t *as, line_t *l, char **p, char *opc);
 extern int expand_struct(asmstate_t *as, line_t *l, char **p, char *opc);
+extern int add_macro_line(asmstate_t *as, char *optr);
 
 /*
 pass 1: parse the lines

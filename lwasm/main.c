@@ -22,6 +22,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <argp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <lw_alloc.h>
 #include <lw_string.h>
@@ -248,7 +249,7 @@ int main(int argc, char **argv)
 		// output dependencies
 		char *n;
 		
-		while (n = lw_stack_pop(asmstate.includelist))
+		while ((n = lw_stack_pop(asmstate.includelist)))
 		{
 			fprintf(stdout, "%s\n", n);
 			lw_free(n);

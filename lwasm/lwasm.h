@@ -304,12 +304,13 @@ extern void lwasm_show_errors(asmstate_t *as);
 
 extern int lwasm_reduce_expr(asmstate_t *as, lw_expr_t expr);
 
-extern void debug_message(asmstate_t *as, int level, const char *fmt, ...);
-extern void dump_state(asmstate_t *as);
-
 extern lw_expr_t lwasm_parse_cond(asmstate_t *as, char **p);
 
 #endif
+
+extern void debug_message(asmstate_t *as, int level, const char *fmt, ...);
+extern void dump_state(asmstate_t *as);
+
 
 #define OPLEN(op) (((op)>0xFF)?2:1)
 #define CURPRAGMA(l,p)	(((l)->pragmas & (p)) ? 1 : 0)

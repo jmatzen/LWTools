@@ -36,7 +36,7 @@ extern void insn_emit_gen_aux(asmstate_t *as, line_t *l, int extra);
 // for aim, oim, eim, tim
 PARSEFUNC(insn_parse_logicmem)
 {
-	const char *p2;
+//	const char *p2;
 	lw_expr_t s;
 	
 	if (**p == '#')

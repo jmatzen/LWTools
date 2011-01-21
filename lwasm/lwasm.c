@@ -24,6 +24,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <lw_expr.h>
 #include <lw_alloc.h>
@@ -597,6 +598,7 @@ lw_expr_t lwasm_parse_expr(asmstate_t *as, char **p)
 int lwasm_reduce_expr(asmstate_t *as, lw_expr_t expr)
 {
 	lw_expr_simplify(expr, as);
+	return 0;
 }
 
 void lwasm_save_expr(line_t *cl, int id, lw_expr_t expr)
