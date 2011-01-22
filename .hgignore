@@ -1,0 +1,11 @@
+syntax: glob
+*.exe
+*.o
+*.d
+*.a
+*~
+*.orig
+lwasm
+lwar
+lwlink
+lwobjdump
