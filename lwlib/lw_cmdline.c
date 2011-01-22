@@ -22,6 +22,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "lw_alloc.h"
 
@@ -207,7 +208,6 @@ static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 	struct lw_cmdline_options **llist;
 	int nopt;
 	int i;
-	int t;
 	char *tstr;
 	int col = 0;
 	

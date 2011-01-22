@@ -22,22 +22,22 @@ Implements the program startup code
 
 */
 
-#include <argp.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
+#include <lw_cmdline.h>
+
 #include "lwlink.h"
 
 char *program_name;
 
 // command line option handling
-const char *argp_program_version = "LWLINK from " PACKAGE_STRING;
-const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+#define PROGVER "lwlink from " PACKAGE_STRING
 
-static error_t parse_opts(int key, char *arg, struct argp_state *state)
+static int parse_opts(int key, char *arg, void *state)
 {
 	switch (key)
 	{
@@ -80,7 +80,7 @@ static error_t parse_opts(int key, char *arg, struct argp_state *state)
 			exit(1);
 		}
 		break;
-	case ARGP_KEY_END:
+	case lw_cmdline_key_end:
 		// done; sanity check
 		if (!outfile)
 			outfile = "a.out";
@@ -102,17 +102,17 @@ static error_t parse_opts(int key, char *arg, struct argp_state *state)
 		map_file = arg;
 		break;
 	
-	case ARGP_KEY_ARG:
+	case lw_cmdline_key_arg:
 		add_input_file(arg);
 		break;
 		
 	default:
-		return ARGP_ERR_UNKNOWN;
+		return lw_cmdline_err_unknown;
 	}
 	return 0;
 }
 
-static struct argp_option options[] =
+static struct lw_cmdline_options options[] =
 {
 	{ "output",		'o',	"FILE",	0,
 				"Output to FILE"},
@@ -137,12 +137,13 @@ static struct argp_option options[] =
 	{ 0 }
 };
 
-static struct argp argp =
+static struct lw_cmdline_parser cmdline_parser =
 {
 	options,
 	parse_opts,
-	"<input file> ...",
-	"LWLINK, a HD6309 and MC6809 cross-linker"
+	"INPUTFILE ...",
+	"lwlink, a HD6309 and MC6809 cross-linker",
+	PROGVER
 };
 
 extern void read_files(void);
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
 {
 	program_name = argv[0];
 
-	argp_parse(&argp, argc, argv, 0, 0, NULL);
+	lw_cmdline_parse(&cmdline_parser, argc, argv, 0, 0, NULL);
 	if (ninputfiles == 0)
 	{
 		fprintf(stderr, "No input files\n");

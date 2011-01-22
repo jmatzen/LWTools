@@ -32,24 +32,26 @@ lwobjdump: lwlink/lwobjdump
 lwasm/lwasm: $(lwasm_objs) lwlib lwasm/rules.make
 	$(CC) -o $@ $(lwasm_objs) $(LDFLAGS)
 
-lwlink/lwlink: $(lwlink_objs) lwlink/rules.make
-	$(CC) -o $@ $(lwlink_objs)
+lwlink/lwlink: $(lwlink_objs) lwlib lwlink/rules.make
+	$(CC) -o $@ $(lwlink_objs) $(LDFLAGS)
 
-lwlink/lwobjdump: $(lwobjdump_objs) lwlink/rules.make
-	$(CC) -o $@ $(lwobjdump_objs)
+lwlink/lwobjdump: $(lwobjdump_objs) lwlib lwlink/rules.make
+	$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
 
 lwar/lwar: $(lwar_objs) lwar/rules.make
 	$(CC) -o $@ $(lwar_objs)
 
+test: test.c lwlib
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ test.c $(LDFLAGS)
 
 .PHONY: lwlib
 lwlib: lwlib/liblw.a
 
 lwlib/liblw.a: $(lwlib_objs) lwlib/rules.make
-	$(AR) rc $@ $^
+	$(AR) rc $@ $(lwlib_objs)
 
 %.d: %.c
-	@echo "Building dependencies for $@"
+#	@echo "Building dependencies for $@"
 	@$(CC) -MM $(CPPFLAGS) -o $*.d $<
 	@mv -f $*.d $*.d.tmp
 	@sed -e 's|.*:|$*.o $*.d:|' < $*.d.tmp > $*.d

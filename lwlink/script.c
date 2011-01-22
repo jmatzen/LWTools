@@ -27,8 +27,10 @@ Read and parse linker scripts
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+#include <lw_string.h>
+
 #include "lwlink.h"
-#include "util.h"
 
 // the built-in DECB target linker script
 static char *decb_script =
@@ -87,7 +89,7 @@ void setup_script()
 		size = ftell(f);
 		rewind(f);
 		
-		script = lw_malloc(size + 2);
+		script = lw_alloc(size + 2);
 		
 		bread = fread(script, 1, size, f);
 		if (bread < size)
@@ -132,7 +134,7 @@ void setup_script()
 			for (i = 0; i < nscriptls; i++)
 				size += strlen(scriptls[i]) + 1;
 			
-			rscript = lw_malloc(size + 1);
+			rscript = lw_alloc(size + 1);
 			oscript = rscript;
 			for (i = 0; i < nscriptls; i++)
 			{
@@ -155,7 +157,7 @@ void setup_script()
 		for (ptr = script; *ptr && *ptr != '\n' && *ptr != '\r'; ptr++)
 			/* do nothing */ ;
 		
-		line = lw_malloc(ptr - script + 1);
+		line = lw_alloc(ptr - script + 1);
 		memcpy(line, script, ptr - script);
 		line[ptr - script] = '\0';
 

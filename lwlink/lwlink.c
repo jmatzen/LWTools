@@ -29,8 +29,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+#include <lw_string.h>
+
 #include "lwlink.h"
-#include "util.h"
 
 int debug_level = 0;
 int outformat = OUTPUT_DECB;
@@ -51,7 +53,7 @@ char **scriptls = NULL;
 void add_input_file(char *fn)
 {
 	inputfiles = lw_realloc(inputfiles, sizeof(fileinfo_t *) * (ninputfiles + 1));
-	inputfiles[ninputfiles] = lw_malloc(sizeof(fileinfo_t));
+	inputfiles[ninputfiles] = lw_alloc(sizeof(fileinfo_t));
 	memset(inputfiles[ninputfiles], 0, sizeof(fileinfo_t));
 	inputfiles[ninputfiles] -> forced = 1;
 	inputfiles[ninputfiles++] -> filename = lw_strdup(fn);
@@ -60,7 +62,7 @@ void add_input_file(char *fn)
 void add_input_library(char *libname)
 {
 	inputfiles = lw_realloc(inputfiles, sizeof(fileinfo_t *) * (ninputfiles + 1));
-	inputfiles[ninputfiles] = lw_malloc(sizeof(fileinfo_t));
+	inputfiles[ninputfiles] = lw_alloc(sizeof(fileinfo_t));
 	memset(inputfiles[ninputfiles], 0, sizeof(fileinfo_t));
 	inputfiles[ninputfiles] -> islib = 1;
 	inputfiles[ninputfiles] -> forced = 0;
@@ -95,7 +97,7 @@ void add_section_base(char *sectspec)
 	}
 	baseaddr = baseaddr & 0xffff;
 	
-	t = lw_malloc(l + 25);
+	t = lw_alloc(l + 25);
 	sprintf(t, "section %s load %04X", sectspec, baseaddr);
 	if (base)
 		*base = '=';

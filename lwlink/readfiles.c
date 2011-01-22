@@ -22,14 +22,15 @@ Reads input files
 
 */
 
-#include <argp.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+#include <lw_string.h>
+
 #include "lwlink.h"
-#include "util.h"
 
 void read_lwobj16v0(fileinfo_t *fn);
 void read_lwar1v(fileinfo_t *fn);
@@ -77,7 +78,7 @@ void read_files(void)
 			for (j = 0; j < nlibdirs; j++)
 			{
 				s = strlen(libdirs[j]) + 7 + strlen(inputfiles[i] -> filename);
-				tf = lw_malloc(s + 1);
+				tf = lw_alloc(s + 1);
 				sprintf(tf, "%s/lib%s.a", libdirs[j], inputfiles[i] -> filename);
 				f = fopen(tf, "rb");
 				if (!f)
@@ -108,7 +109,7 @@ void read_files(void)
 		size = ftell(f);
 		rewind(f);
 		
-		inputfiles[i] -> filedata = lw_malloc(size);
+		inputfiles[i] -> filedata = lw_alloc(size);
 		inputfiles[i] -> filesize = size;
 		
 		bread = fread(inputfiles[i] -> filedata, 1, size, f);
@@ -219,7 +220,7 @@ void read_lwobj16v0(fileinfo_t *fn)
 			// val is now the symbol value
 			
 			// create symbol table entry
-			se = lw_malloc(sizeof(symtab_t));
+			se = lw_alloc(sizeof(symtab_t));
 			se -> next = s -> localsyms;
 			s -> localsyms = se;
 			se -> sym = fp;
@@ -241,7 +242,7 @@ void read_lwobj16v0(fileinfo_t *fn)
 			// val is now the symbol value
 			
 			// create symbol table entry
-			se = lw_malloc(sizeof(symtab_t));
+			se = lw_alloc(sizeof(symtab_t));
 			se -> next = s -> exportedsyms;
 			s -> exportedsyms = se;
 			se -> sym = fp;
@@ -258,7 +259,7 @@ void read_lwobj16v0(fileinfo_t *fn)
 			lw_expr_term_t *term;
 			
 			// we have a reference
-			rp = lw_malloc(sizeof(reloc_t));
+			rp = lw_alloc(sizeof(reloc_t));
 			rp -> next = s -> incompletes;
 			s -> incompletes = rp;
 			rp -> offset = 0;
@@ -409,7 +410,7 @@ void read_lwar1v(fileinfo_t *fn)
 		
 		// add the "sub" input file
 		fn -> subs = lw_realloc(fn -> subs, sizeof(fileinfo_t *) * (fn -> nsubs + 1));
-		fn -> subs[fn -> nsubs] = lw_malloc(sizeof(fileinfo_t));
+		fn -> subs[fn -> nsubs] = lw_alloc(sizeof(fileinfo_t));
 		memset(fn -> subs[fn -> nsubs], 0, sizeof(fileinfo_t));
 		fn -> subs[fn -> nsubs] -> filedata = fn -> filedata + cc;
 		fn -> subs[fn -> nsubs] -> filesize = flen;

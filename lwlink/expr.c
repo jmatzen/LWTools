@@ -28,14 +28,16 @@ This file contains the actual expression evaluator
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+#include <lw_string.h>
+
 #include "expr.h"
-#include "util.h"
 
 lw_expr_stack_t *lw_expr_stack_create(void)
 {
 	lw_expr_stack_t *s;
 	
-	s = lw_malloc(sizeof(lw_expr_stack_t));
+	s = lw_alloc(sizeof(lw_expr_stack_t));
 	s -> head = NULL;
 	s -> tail = NULL;
 	return s;
@@ -80,7 +82,7 @@ lw_expr_term_t *lw_expr_term_create_oper(int oper)
 {
 	lw_expr_term_t *t;
 
-	t = lw_malloc(sizeof(lw_expr_term_t));
+	t = lw_alloc(sizeof(lw_expr_term_t));
 	t -> term_type = LW_TERM_OPER;
 	t -> value = oper;
 	return t;
@@ -90,7 +92,7 @@ lw_expr_term_t *lw_expr_term_create_int(int val)
 {
 	lw_expr_term_t *t;
 	
-	t = lw_malloc(sizeof(lw_expr_term_t));
+	t = lw_alloc(sizeof(lw_expr_term_t));
 	t -> term_type = LW_TERM_INT;
 	t -> value = val;
 	return t;
@@ -100,7 +102,7 @@ lw_expr_term_t *lw_expr_term_create_sym(char *sym, int symtype)
 {
 	lw_expr_term_t *t;
 	
-	t = lw_malloc(sizeof(lw_expr_term_t));
+	t = lw_alloc(sizeof(lw_expr_term_t));
 	t -> term_type = LW_TERM_SYM;
 	t -> symbol = lw_strdup(sym);
 	t -> value = symtype;
@@ -135,7 +137,7 @@ void lw_expr_stack_push(lw_expr_stack_t *s, lw_expr_term_t *t)
 		exit(1);
 	}
 	
-	n = lw_malloc(sizeof(lw_expr_stack_node_t));
+	n = lw_alloc(sizeof(lw_expr_stack_node_t));
 	n -> next = NULL;
 	n -> prev = s -> tail;
 	n -> term = lw_expr_term_dup(t);

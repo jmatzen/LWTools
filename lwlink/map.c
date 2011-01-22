@@ -26,8 +26,9 @@ Output information about the linking process
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+
 #include "lwlink.h"
-#include "util.h"
 
 struct symliste
 {
@@ -91,7 +92,7 @@ void display_map(void)
 					break;
 				pe = ce;
 			}
-			ne = lw_malloc(sizeof(struct symliste));
+			ne = lw_alloc(sizeof(struct symliste));
 			ne -> ext = 0;
 			ne -> addr = sym -> offset + sectlist[sn].ptr -> loadaddress;
 			ne -> next = ce;

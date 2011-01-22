@@ -25,7 +25,7 @@ A standalone program to dump an object file in a text form to stdout
 #include <stdlib.h>
 #include <string.h>
 
-#include "util.h"
+#include <lw_alloc.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	size = ftell(f);
 	rewind(f);
 		
-	filedata = lw_malloc(size);
+	filedata = lw_alloc(size);
 		
 	bread = fread(filedata, 1, size, f);
 	if (bread < size)

@@ -25,9 +25,10 @@ Resolve section and symbol addresses; handle incomplete references
 #include <stdlib.h>
 #include <string.h>
 
+#include <lw_alloc.h>
+
 #include "expr.h"
 #include "lwlink.h"
-#include "util.h"
 
 struct section_list *sectlist = NULL;
 int nsects = 0;
