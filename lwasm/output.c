@@ -234,6 +234,7 @@ int write_code_obj_expraux(lw_expr_t e, void *of)
 {
 	int tt;
 	int v;
+	int count = 1;
 	unsigned char buf[16];
 	
 	tt = lw_expr_type(e);
@@ -242,10 +243,12 @@ int write_code_obj_expraux(lw_expr_t e, void *of)
 	{
 	case lw_expr_type_oper:
 		buf[0] =  0x04;
+		
 		switch (lw_expr_whichop(e))
 		{
 		case lw_expr_oper_plus:
 			buf[1] = 0x01;
+			count = lw_expr_operandcount(e) - 1;
 			break;
 		
 		case lw_expr_oper_minus:
@@ -254,6 +257,7 @@ int write_code_obj_expraux(lw_expr_t e, void *of)
 		
 		case lw_expr_oper_times:
 			buf[1] = 0x03;
+			count = lw_expr_operandcount(e) - 1;
 			break;
 		
 		case lw_expr_oper_divide:
@@ -299,7 +303,8 @@ int write_code_obj_expraux(lw_expr_t e, void *of)
 		default:
 			buf[1] = 0xff;
 		}
-		writebytes(buf, 2, 1, of);
+		while (count--)
+			writebytes(buf, 2, 1, of);
 		return 0;
 
 	case lw_expr_type_int:

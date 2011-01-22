@@ -105,6 +105,8 @@ extern int lw_expr_type(lw_expr_t e);
 
 typedef int lw_expr_testfn_t(lw_expr_t e, void *priv);
 
+extern int lw_expr_operandcount(lw_expr_t e);
+
 // run a function on all terms in an expression; if the function
 // returns non-zero for any term, return non-zero, else return
 // zero

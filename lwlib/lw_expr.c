@@ -1268,3 +1268,17 @@ void *lw_expr_specptr(lw_expr_t e)
 {
 	return e -> value2;
 }
+
+int lw_expr_operandcount(lw_expr_t e)
+{
+	int count = 0;
+	struct lw_expr_opers *o;
+	
+	if (e -> type != lw_expr_type_oper)
+		return 0;
+	
+	for (o = e -> operands; o; o = o -> next)
+		count++;
+	
+	return count;
+}
