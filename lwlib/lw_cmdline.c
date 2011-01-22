@@ -28,6 +28,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #define ___lw_cmdline_c_seen___
 #include "lw_cmdline.h"
 
+#define DOCCOL 30
+#define LLEN 78
+
 static struct lw_cmdline_options builtin[3] =
 {
 	{ "help", '?', 0, 0, "give this help list" },
@@ -35,13 +38,36 @@ static struct lw_cmdline_options builtin[3] =
 	{ "version", 'V', 0, 0, "print program version" }
 };
 
+static int cmpr(const void *e1, const void *e2)
+{
+	struct lw_cmdline_options **o1, **o2;
+	o1 = (struct lw_cmdline_options **)e1;
+	o2 = (struct lw_cmdline_options **)e2;
+	
+	return strcmp((*o1) -> name, (*o2) -> name);
+}
+
+static int cmpr2(const void *e1, const void *e2)
+{
+	struct lw_cmdline_options **o1, **o2;
+	o1 = (struct lw_cmdline_options **)e1;
+	o2 = (struct lw_cmdline_options **)e2;
+
+	if ((*o1) -> key < ((*o2) -> key))
+		return -1;
+	if ((*o1) -> key > ((*o2) -> key))
+		return 1;
+	return 0;
+}
+
 static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 {
 	struct lw_cmdline_options **slist, **llist;
 	int nopt;
 	int i;
 	int t;
-	
+	int col;
+		
 	for (nopt = 0; parser -> options[nopt].name; nopt++)
 		/* do nothing */ ;
 	
@@ -55,6 +81,8 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 	}
 	
 	/* now sort the two lists */
+	qsort(slist, nopt, sizeof(struct lw_cmdline_options *), cmpr2);
+	qsort(llist, nopt, sizeof(struct lw_cmdline_options *), cmpr);
 	
 	/* now append the automatic options */
 	slist[nopt] = &(builtin[0]);
@@ -68,6 +96,8 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 	/* now show the usage message */
 	printf("Usage: %s", name);
 	
+	col = 7 + strlen(name);
+	
 	/* print short options that take no args */
 	t = 0;
 	for (i = 0; i < nopt + 3; i++)
@@ -80,13 +110,18 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 				{
 					printf(" [-");
 					t = 1;
+					col += 3;
 				}
 				printf("%c", slist[i]->key);
+				col++;
 			}
 		}
 	}
 	if (t)
+	{
+		col++;
 		printf("]");
+	}
 	
 	/* print short options that take args */
 	for (i = 0; i < nopt + 3; i++)
@@ -95,11 +130,25 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 		{
 			if (slist[i]->flags & lw_cmdline_opt_optional)
 			{
+				t = 7 + strlen(slist[i] -> arg);
+				if (col + t > LLEN)
+				{
+					printf("\n       ");
+					col = 7;
+				}
 				printf(" [-%c[%s]]", slist[i]->key, slist[i]->arg);
+				col += t;
 			}
 			else
 			{
+				t = 6 + strlen(slist[i] -> arg);
+				if (col + t > LLEN)
+				{
+					printf("\n       ");
+					col = 7;
+				}
 				printf(" [-%c %s]", slist[i]->key, slist[i]->arg);
+				col += t;
 			}
 		}
 	}
@@ -109,21 +158,41 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 	{
 		if (llist[i]->arg)
 		{
-			printf(" [--%s=%s%s%s]", 
+			t = strlen(llist[i] -> name) + 6 + strlen(llist[i] -> arg);
+			if (llist[i] -> flags & lw_cmdline_opt_optional)
+				t += 2;
+			if (col + t > LLEN)
+			{
+				printf("\n       ");
+				col = 7;
+			}
+			printf(" [--%s%s=%s%s]", 
 				llist[i] -> name,
 				(llist[i] -> flags & lw_cmdline_opt_optional) ? "[" : "",
 				llist[i] -> arg,
 				(llist[i] -> flags & lw_cmdline_opt_optional) ? "]" : "");
+			col += t;
 		}
 		else
 		{
+			t = strlen(llist[i] -> name) + 5;
+			if (col + t > LLEN)
+			{
+				printf("\n       ");
+				col = 7;
+			}
 			printf(" [--%s]", llist[i] -> name);
+			col += t;
 		}
 	}
 	
 	/* print "non option" text */
 	if (parser -> args_doc)
 	{
+		if (col + strlen(parser -> args_doc) + 1 > LLEN)
+		{
+			printf("\n       ");
+		}
 		printf(" %s", parser -> args_doc);
 	}
 	printf("\n");
@@ -140,6 +209,7 @@ static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 	int i;
 	int t;
 	char *tstr;
+	int col = 0;
 	
 	tstr = parser -> doc;
 	for (nopt = 0; parser -> options[nopt].name; nopt++)
@@ -153,6 +223,7 @@ static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 	}
 	
 	/* now sort the list */
+	qsort(llist, nopt, sizeof(struct lw_cmdline_options *), cmpr);
 	
 	/* now append the automatic options */
 	llist[nopt] = &(builtin[0]);
@@ -182,6 +253,7 @@ static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 		{
 			printf("      ");
 		}
+		col = 8 + strlen(llist[i] -> name);
 		
 		printf("--%s", llist[i] -> name);
 		if (llist[i] -> arg)
@@ -189,15 +261,54 @@ static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 			if (llist[i] -> flags & lw_cmdline_opt_optional)
 			{
 				printf("[=%s]", llist[i] -> arg);
+				col += 3 + strlen(llist[i] -> arg);
 			}
 			else
 			{
 				printf("=%s", llist[i] -> arg);
+				col += 1 + strlen(llist[i] -> arg);
 			}
 		}
 		if (llist[i] -> doc)
 		{
-			printf("\t\t%s", llist[i] -> doc);
+			char *s = llist[i] -> doc;
+			char *s2;
+			
+			while (*s && isspace(*s))
+				s++;
+
+			if (col > DOCCOL)
+			{
+				fputc('\n', stdout);
+				col = 0;
+			}
+			while (*s)
+			{
+				while (col < (DOCCOL - 1))
+				{
+					fputc(' ', stdout);
+					col++;
+				}
+				for (s2 = s; *s2 && !isspace(*s2); s2++)
+					/* do nothing */ ;
+				if ((col + (s2 - s) + 1) > LLEN && col >= DOCCOL)
+				{
+					/* next line */
+					fputc('\n', stdout);
+					col = 0;
+					continue;
+				}
+				col++;
+				fputc(' ', stdout);
+				while (s != s2)
+				{
+					fputc(*s, stdout);
+					col++;
+					s++;
+				}
+				while (*s && isspace(*s))
+					s++;
+			}
 		}
 		fputc('\n', stdout);
 	}
