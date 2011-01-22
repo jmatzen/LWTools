@@ -133,9 +133,84 @@ static void lw_cmdline_usage(struct lw_cmdline_parser *parser, char *name)
 	lw_free(llist);
 }
 
-static void lw_cmdline_help(struct lw_cmdline_parser *parser)
+static void lw_cmdline_help(struct lw_cmdline_parser *parser, char *name)
 {
-	printf("TODO: help\n");
+	struct lw_cmdline_options **llist;
+	int nopt;
+	int i;
+	int t;
+	char *tstr;
+	
+	tstr = parser -> doc;
+	for (nopt = 0; parser -> options[nopt].name; nopt++)
+		/* do nothing */ ;
+	
+	llist = lw_alloc(sizeof(struct lw_cmdline_options *) * (nopt + 3));	
+
+	for (i = 0; i < nopt; i++)
+	{
+		llist[i] = &(parser -> options[i]);
+	}
+	
+	/* now sort the list */
+	
+	/* now append the automatic options */
+	llist[nopt] = &(builtin[0]);
+	llist[nopt + 1] = &(builtin[1]);
+	llist[nopt + 2] = &(builtin[2]);
+	
+	/* print brief usage */
+	printf("Usage: %s [OPTION...] %s\n", name, parser -> args_doc ? parser -> args_doc : "");
+	if (tstr)
+	{
+		while (*tstr && *tstr != '\v')
+			fputc(*tstr++, stdout);
+		if (*tstr)
+			tstr++;
+	}
+	fputc('\n', stdout);
+	fputc('\n', stdout);
+
+	/* display options - do it the naïve way for now */
+	for (i = 0; i < (nopt + 3); i++)
+	{
+		if (llist[i] -> key > 0x20 && llist[i] -> key < 0x7F)
+		{
+			printf("  -%c, ", llist[i] -> key);
+		}
+		else
+		{
+			printf("      ");
+		}
+		
+		printf("--%s", llist[i] -> name);
+		if (llist[i] -> arg)
+		{
+			if (llist[i] -> flags & lw_cmdline_opt_optional)
+			{
+				printf("[=%s]", llist[i] -> arg);
+			}
+			else
+			{
+				printf("=%s", llist[i] -> arg);
+			}
+		}
+		if (llist[i] -> doc)
+		{
+			printf("\t\t%s", llist[i] -> doc);
+		}
+		fputc('\n', stdout);
+	}
+
+	printf("\nMandatory or optional arguments to long options are also mandatory or optional\nfor any corresponding short options.\n");
+
+	if (*tstr)
+	{
+		printf("\n%s\n", tstr);
+	}
+
+	/* clean up scratch lists */
+	lw_free(llist);
 }
 
 int lw_cmdline_parse(struct lw_cmdline_parser *parser, int argc, char **argv, unsigned flags, int *arg_index, void *input)
@@ -285,7 +360,7 @@ int lw_cmdline_parse(struct lw_cmdline_parser *parser, int argc, char **argv, un
 	return r;
 
 do_help:
-	lw_cmdline_help(parser);
+	lw_cmdline_help(parser, argv[0]);
 	exit(0);
 
 do_version:
