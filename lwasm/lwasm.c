@@ -227,6 +227,11 @@ int lwasm_next_context(asmstate_t *as)
 
 void lwasm_emit(line_t *cl, int byte)
 {
+	if (cl -> as -> output_format == OUTPUT_OBJ && cl -> csect == NULL)
+	{
+		lwasm_register_error(cl -> as, cl, "Instruction generating output outside of a section");
+		return;
+	}
 	if (cl -> outputl < 0)
 		cl -> outputl = 0;
 
@@ -662,6 +667,12 @@ int lwasm_emitexpr(line_t *l, lw_expr_t expr, int size)
 		{
 			reloctab_t *re;
 			lw_expr_t te;
+
+			if (l -> csect == NULL)
+			{
+				lwasm_register_error(l -> as, l, "Instruction generating output outside of a section");
+				return;
+			}
 			
 			if (size == 4)
 			{
