@@ -38,8 +38,8 @@ lwlink/lwlink: $(lwlink_objs) lwlib lwlink/rules.make
 lwlink/lwobjdump: $(lwobjdump_objs) lwlib lwlink/rules.make
 	$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
 
-lwar/lwar: $(lwar_objs) lwar/rules.make
-	$(CC) -o $@ $(lwar_objs)
+lwar/lwar: $(lwar_objs) lwlib lwar/rules.make
+	$(CC) -o $@ $(lwar_objs) $(LDFLAGS)
 
 test: test.c lwlib
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ test.c $(LDFLAGS)

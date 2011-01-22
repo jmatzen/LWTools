@@ -28,9 +28,10 @@ Implements the program startup code
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <lw_alloc.h>
+
 #define __lwar_c_seen__
 #include "lwar.h"
-#include "util.h"
 
 typedef struct
 {

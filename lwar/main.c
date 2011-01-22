@@ -22,7 +22,6 @@ Implements the program startup code
 
 */
 
-#include <argp.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,14 +29,15 @@ Implements the program startup code
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <lw_cmdline.h>
+
 #include "lwar.h"
 
 // command line option handling
-const char *argp_program_version = "LWAR from " PACKAGE_STRING;
-const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+#define PROGVER "lwar from " PACKAGE_STRING
 char *program_name;
 
-static error_t parse_opts(int key, char *arg, struct argp_state *state)
+static int parse_opts(int key, char *arg, void *state)
 {
 	switch (key)
 	{
@@ -75,7 +75,7 @@ static error_t parse_opts(int key, char *arg, struct argp_state *state)
 		operation = LWAR_OP_EXTRACT;
 		break;
 
-	case ARGP_KEY_ARG:
+	case lw_cmdline_key_arg:
 		if (archive_file)
 		{
 			// add archive member to list
@@ -86,12 +86,12 @@ static error_t parse_opts(int key, char *arg, struct argp_state *state)
 		break;
 		
 	default:
-		return ARGP_ERR_UNKNOWN;
+		return lw_cmdline_err_unknown;
 	}
 	return 0;
 }
 
-static struct argp_option options[] =
+static struct lw_cmdline_options options[] =
 {
 	{ "replace",	'r',	0,		0,
 				"Add or replace archive members" },
@@ -110,12 +110,13 @@ static struct argp_option options[] =
 	{ 0 }
 };
 
-static struct argp argp =
+static struct lw_cmdline_parser argparser =
 {
 	options,
 	parse_opts,
-	"<archive> [<file> ...]",
-	"LWAR, a library file manager for LWLINK"
+	"ARCHIVE [FILE ...]",
+	"lwar, a library file manager for lwlink",
+	PROGVER
 };
 
 extern void do_list(void);
@@ -129,7 +130,7 @@ extern void do_extract(void);
 int main(int argc, char **argv)
 {
 	program_name = argv[0];
-	argp_parse(&argp, argc, argv, 0, 0, NULL);
+	lw_cmdline_parse(&argparser, argc, argv, 0, 0, NULL);
 	if (archive_file == NULL)
 	{
 		fprintf(stderr, "You must specify an archive file.\n");
