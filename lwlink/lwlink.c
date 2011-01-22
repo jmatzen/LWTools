@@ -23,7 +23,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #define __lwlink_c_seen__
 
-#include <argp.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

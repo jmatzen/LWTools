@@ -58,6 +58,16 @@ struct input_stack
 	char *filespec;
 };
 
+static char *make_filename(char *p, char *f)
+{
+	int l;
+	char *r;
+	l = strlen(p) + strlen(f) + 1;
+	r = lw_alloc(l + 1);
+	sprintf(r, "%s/%s", p, f);
+	return r;
+}
+
 #define IS	((struct input_stack *)(as -> input_data))
 
 void input_init(asmstate_t *as)
@@ -179,7 +189,7 @@ void input_open(asmstate_t *as, char *s)
 		
 		/* relative path, check relative to "current file" directory */
 		p = lw_stack_top(as -> file_dir);
-		(void)(0 == asprintf(&p2, "%s/%s", p, s));
+		p2 = make_filename(p, s);
 		debug_message(as, 1, "Open: (cd) %s\n", p2);
 		IS -> data = fopen(p2, "rb");
 		if (IS -> data)
@@ -195,7 +205,7 @@ void input_open(asmstate_t *as, char *s)
 		lw_stringlist_reset(as -> include_list);
 		while ((p = lw_stringlist_current(as -> include_list)))
 		{
-			(void)(0 == asprintf(&p2, "%s/%s", p, s));
+			p2 = make_filename(p, s);
 		debug_message(as, 1, "Open (sp): %s\n", p2);
 			IS -> data = fopen(p2, "rb");
 			if (IS -> data)
@@ -247,7 +257,7 @@ FILE *input_open_standalone(asmstate_t *as, char *s)
 
 	/* relative path, check relative to "current file" directory */
 	p = lw_stack_top(as -> file_dir);
-	(void)(0 == asprintf(&p2, "%s/%s", p, s));
+	p2 = make_filename(p, s);
 	debug_message(as, 2, "Open file (st cd) %s", p2);
 	fp = fopen(p2, "rb");
 	if (fp)
@@ -261,7 +271,7 @@ FILE *input_open_standalone(asmstate_t *as, char *s)
 	lw_stringlist_reset(as -> include_list);
 	while ((p = lw_stringlist_current(as -> include_list)))
 	{
-		(void)(0 == asprintf(&p2, "%s/%s", p, s));
+		p2 = make_filename(p, s);
 		debug_message(as, 2, "Open file (st ip) %s", p2);
 		fp = fopen(p2, "rb");
 		if (fp)

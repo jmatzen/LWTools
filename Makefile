@@ -1,8 +1,29 @@
-CPPFLAGS += -I lwlib -D_GNU_SOURCE -DPACKAGE_STRING='"lwtools 4.0-pre"' -DPACKAGE_BUGREPORT='"lost@l-w.ca"'
+# define anything system specific here
+#
+# set these variables if needed
+# PROGSUFFIX: suffix added to binaries
+# BUILDTPREFIX: prefix added to build utilities (cc, etc.) for xcompile
+# can also set them when invoking "make"
+#PROGSUFFIX := .exe
+#BUILDTPREFIX=i586-mingw32msvc-
 
+# C compiler
+CC := $(BUILDTPREFIX)cc
+
+# ar
+AR := $(BUILDTPREFIX)ar
+
+# ranlib
+RANLIB := $(BUILDTPREFIX)ranlib
+
+CPPFLAGS += -I lwlib -DPACKAGE_STRING='"lwtools 4.0-pre"'
 LDFLAGS += -L$(PWD)/lwlib -llw
 
-MAIN_TARGETS := lwasm/lwasm lwlink/lwlink lwar/lwar lwlink/lwobjdump
+
+MAIN_TARGETS := lwasm/lwasm$(PROGSUFFIX) \
+	lwlink/lwlink$(PROGSUFFIX) \
+	lwar/lwar$(PROGSUFFIX) \
+	lwlink/lwobjdump$(PROGSUFFIX)
 
 .PHONY: all
 all: $(MAIN_TARGETS)
@@ -23,22 +44,22 @@ lwar_deps := $(lwar_srcs:.c=.d)
 lwlib_deps := $(lwlib_srcs:.c=.d)
 lwobjdump_deps := $(lwobjdump_srcs:.c=.d)
 
-.PHONY: lwlink lwasm lwar lwobjdump
-lwlink: lwlink/lwlink
-lwasm: lwasm/lwasm
-lwar: lwar/lwar
-lwobjdump: lwlink/lwobjdump
+.PHONY: lwlink lwasm lwar lwobjdump$(PROGSUFFIX)
+lwlink: lwlink/lwlink$(PROGSUFFIX)
+lwasm: lwasm/lwasm$(PROGSUFFIX)
+lwar: lwar/lwar$(PROGSUFFIX)
+lwobjdump: lwlink/lwobjdump$(PROGSUFFIX)
 
-lwasm/lwasm: $(lwasm_objs) lwlib lwasm/rules.make
+lwasm/lwasm$(PROGSUFFIX): $(lwasm_objs) lwlib lwasm/rules.make
 	$(CC) -o $@ $(lwasm_objs) $(LDFLAGS)
 
-lwlink/lwlink: $(lwlink_objs) lwlib lwlink/rules.make
+lwlink/lwlink$(PROGSUFFIX): $(lwlink_objs) lwlib lwlink/rules.make
 	$(CC) -o $@ $(lwlink_objs) $(LDFLAGS)
 
-lwlink/lwobjdump: $(lwobjdump_objs) lwlib lwlink/rules.make
+lwlink/lwobjdump$(PROGSUFFIX): $(lwobjdump_objs) lwlib lwlink/rules.make
 	$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
 
-lwar/lwar: $(lwar_objs) lwlib lwar/rules.make
+lwar/lwar$(PROGSUFFIX): $(lwar_objs) lwlib lwar/rules.make
 	$(CC) -o $@ $(lwar_objs) $(LDFLAGS)
 
 test: test.c lwlib
@@ -49,6 +70,7 @@ lwlib: lwlib/liblw.a
 
 lwlib/liblw.a: $(lwlib_objs) lwlib/rules.make
 	$(AR) rc $@ $(lwlib_objs)
+	$(RANLIB) $@
 
 %.d: %.c
 #	@echo "Building dependencies for $@"
@@ -67,7 +89,7 @@ extra_clean := $(extra_clean) *~ */*~
 .PHONY: clean
 clean:
 	rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
-	rm -f lwlib/liblw.a lwasm/lwasm lwlink/lwlink lwlink/lwobjdump lwar/lwar
+	rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
 	rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
 	rm -f $(extra_clean)
 

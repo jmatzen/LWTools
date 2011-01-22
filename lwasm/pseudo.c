@@ -21,6 +21,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #include <lw_alloc.h>
 
@@ -1034,6 +1035,7 @@ PARSEFUNC(pseudo_parse_include)
 	char *fn, *p2;
 	char *p3;
 	int delim = 0;
+	int len;
 	
 	if (!**p)
 	{
@@ -1059,7 +1061,9 @@ PARSEFUNC(pseudo_parse_include)
 	if (delim && **p)
 		(*p)++;
 	
-	(void)(0 == asprintf(&p3, "include:%s", fn));
+	len = strlen(fn) + 8;
+	p3 = lw_alloc(len + 1);
+	sprintf(p3, "include:%s", fn);
 	input_open(as, p3);
 	lw_free(p3);
 
