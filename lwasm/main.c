@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <argp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,6 +27,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <lw_string.h>
 #include <lw_stringlist.h>
 #include <lw_expr.h>
+#include <lw_cmdline.h>
 
 #include "lwasm.h"
 #include "input.h"
@@ -35,32 +35,31 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 extern int parse_pragma_string(asmstate_t *as, char *str, int ignoreerr);
 
 /* command line option handling */
-const char *argp_program_version = "lwasm from " PACKAGE_STRING;
-const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+#define PROGVER "lwasm from " PACKAGE_STRING
 char *program_name;
 
-static struct argp_option options[] =
+static struct lw_cmdline_options options[] =
 {
-	{ "output",		'o',	"FILE",		0,						"Output to FILE"},
-	{ "debug",		'd',	"LEVEL",	OPTION_ARG_OPTIONAL,	"Set debug mode"},
-	{ "format",		'f',	"TYPE",		0,						"Select output format: decb, raw, obj, os9"},
-	{ "list",		'l',	"FILE",		OPTION_ARG_OPTIONAL,	"Generate list [to FILE]"},
-	{ "symbols",	's',	0,			OPTION_ARG_OPTIONAL,	"Generate symbol list in listing, no effect without --list"},
-	{ "decb",		'b',	0,			0,						"Generate DECB .bin format output, equivalent of --format=decb"},
-	{ "raw",		'r',	0,			0,						"Generate raw binary format output, equivalent of --format=raw"},
-	{ "obj",		0x100,	0,			0,						"Generate proprietary object file format for later linking, equivalent of --format=obj" },
-	{ "depend",		0x101,	0,			0,						"Output a dependency list to stdout; do not do any actual output though assembly is completed as usual" },
-	{ "pragma",		'p',	"PRAGMA",	0,						"Set an assembler pragma to any value understood by the \"pragma\" pseudo op"},
-	{ "6809",		'9',	0,			0,						"Set assembler to 6809 only mode" },
-	{ "6309",		'3',	0,			0,						"Set assembler to 6309 mode (default)" },
-	{ "includedir",	'I',	"PATH",		0,						"Add entry to include path" },
+	{ "output",		'o',	"FILE",		0,							"Output to FILE"},
+	{ "debug",		'd',	"LEVEL",	lw_cmdline_opt_optional,	"Set debug mode"},
+	{ "format",		'f',	"TYPE",		0,							"Select output format: decb, raw, obj, os9"},
+	{ "list",		'l',	"FILE",		lw_cmdline_opt_optional,	"Generate list [to FILE]"},
+	{ "symbols",	's',	0,			lw_cmdline_opt_optional,	"Generate symbol list in listing, no effect without --list"},
+	{ "decb",		'b',	0,			0,							"Generate DECB .bin format output, equivalent of --format=decb"},
+	{ "raw",		'r',	0,			0,							"Generate raw binary format output, equivalent of --format=raw"},
+	{ "obj",		0x100,	0,			0,							"Generate proprietary object file format for later linking, equivalent of --format=obj" },
+	{ "depend",		0x101,	0,			0,							"Output a dependency list to stdout; do not do any actual output though assembly is completed as usual" },
+	{ "pragma",		'p',	"PRAGMA",	0,							"Set an assembler pragma to any value understood by the \"pragma\" pseudo op"},
+	{ "6809",		'9',	0,			0,							"Set assembler to 6809 only mode" },
+	{ "6309",		'3',	0,			0,							"Set assembler to 6309 mode (default)" },
+	{ "includedir",	'I',	"PATH",		0,							"Add entry to include path" },
 	{ 0 }
 };
 
 
-static error_t parse_opts(int key, char *arg, struct argp_state *state)
+static int parse_opts(int key, char *arg, void *state)
 {
-	asmstate_t *as = state -> input;
+	asmstate_t *as = state;
 	
 	switch (key)
 	{
@@ -146,25 +145,26 @@ static error_t parse_opts(int key, char *arg, struct argp_state *state)
 		as -> target = TARGET_6309;
 		break;
 
-	case ARGP_KEY_END:
+	case lw_cmdline_key_end:
 		break;
 	
-	case ARGP_KEY_ARG:
+	case lw_cmdline_key_arg:
 		lw_stringlist_addstring(as -> input_files, arg);
 		break;
 		
 	default:
-		return ARGP_ERR_UNKNOWN;
+		return lw_cmdline_err_unknown;
 	}
 	return 0;
 }
 
-static struct argp argp =
+static struct lw_cmdline_parser cmdline_parser =
 {
 	options,
 	parse_opts,
-	"<input file>",
-	"LWASM, a HD6309 and MC6809 cross-assembler"
+	"INPUTFILE",
+	"lwasm, a HD6309 and MC6809 cross-assembler\vPlease report bugs to lost@l-w.ca.",
+	PROGVER
 };
 
 /*
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 	asmstate.nextcontext = 1;
 
 	/* parse command line arguments */	
-	argp_parse(&argp, argc, argv, 0, 0, &asmstate);
+	lw_cmdline_parse(&cmdline_parser, argc, argv, 0, 0, &asmstate);
 
 	if (!asmstate.output_file)
 	{
