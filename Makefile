@@ -51,16 +51,20 @@ lwar: lwar/lwar$(PROGSUFFIX)
 lwobjdump: lwlink/lwobjdump$(PROGSUFFIX)
 
 lwasm/lwasm$(PROGSUFFIX): $(lwasm_objs) lwlib lwasm/rules.make
-	$(CC) -o $@ $(lwasm_objs) $(LDFLAGS)
+	@echo Linking $@
+	@$(CC) -o $@ $(lwasm_objs) $(LDFLAGS)
 
 lwlink/lwlink$(PROGSUFFIX): $(lwlink_objs) lwlib lwlink/rules.make
-	$(CC) -o $@ $(lwlink_objs) $(LDFLAGS)
+	@echo Linking $@
+	@$(CC) -o $@ $(lwlink_objs) $(LDFLAGS)
 
 lwlink/lwobjdump$(PROGSUFFIX): $(lwobjdump_objs) lwlib lwlink/rules.make
-	$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
+	@echo Linking $@
+	@$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
 
 lwar/lwar$(PROGSUFFIX): $(lwar_objs) lwlib lwar/rules.make
-	$(CC) -o $@ $(lwar_objs) $(LDFLAGS)
+	@echo Linknig $@
+	@$(CC) -o $@ $(lwar_objs) $(LDFLAGS)
 
 test: test.c lwlib
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ test.c $(LDFLAGS)
@@ -69,11 +73,12 @@ test: test.c lwlib
 lwlib: lwlib/liblw.a
 
 lwlib/liblw.a: $(lwlib_objs) lwlib/rules.make
-	$(AR) rc $@ $(lwlib_objs)
-	$(RANLIB) $@
+	@echo Linking $@
+	@$(AR) rc $@ $(lwlib_objs)
+	@$(RANLIB) $@
 
 %.d: %.c
-#	@echo "Building dependencies for $@"
+	@echo "Building dependencies for $@"
 	@$(CC) -MM $(CPPFLAGS) -o $*.d $<
 	@mv -f $*.d $*.d.tmp
 	@sed -e 's|.*:|$*.o $*.d:|' < $*.d.tmp > $*.d
@@ -86,12 +91,18 @@ alldeps := $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) ($lwobjdump_d
 
 extra_clean := $(extra_clean) *~ */*~
 
+%.o: %.c
+	@echo Building $@
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $<
+	
+
 .PHONY: clean
 clean:
-	rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
-	rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
-	rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
-	rm -f $(extra_clean)
+	@echo "Cleaning up"
+	@rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
+	@rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
+	@rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
+	@rm -f $(extra_clean)
 
 print-%:
 	@echo $* = $($*)
