@@ -38,7 +38,9 @@ void do_list(asmstate_t *as)
 	line_t *cl;
 	FILE *of;
 	int i;
-	
+
+	char *tc;
+		
 	if (!(as -> flags & FLAG_LIST))
 		return;
 
@@ -114,9 +116,35 @@ void do_list(asmstate_t *as)
 			}
 			fprintf(of, " ");
 		}
-		/* the 34.34 below is deliberately chosen so that the start of the line text is at
+		/* the 32.32 below is deliberately chosen so that the start of the line text is at
 		   a multiple of 8 from the start of the list line */
-		fprintf(of, "(%34.34s):%05d %s\n", cl -> linespec, cl -> lineno, cl -> ltext);
+		fprintf(of, "(%32.32s):%05d ", cl -> linespec, cl -> lineno);
+		i = 0;
+		for (tc = cl -> ltext; *tc; tc++)
+		{
+			if ((*tc) == '\t')
+			{
+				if (i % 8 == 0)
+				{
+					i += 8;
+					fprintf(of, "        ");
+				}
+				else
+				{
+					while (i % 8)
+					{
+						fputc(' ', of);
+						i++;
+					}
+				}
+			}
+			else
+			{
+				fputc(*tc, of);
+				i++;
+			}
+		}
+		fputc('\n', of);
 		if (cl -> outputl > 8)
 		{
 			for (i = 8; i < cl -> outputl; i++)
