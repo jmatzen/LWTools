@@ -28,7 +28,7 @@ MAIN_TARGETS := lwasm/lwasm$(PROGSUFFIX) \
 .PHONY: all
 all: $(MAIN_TARGETS)
 
-subdirs := lwasm lwlink lwar lwlib docs
+subdirs := lwasm lwlink lwar lwlib lwbasic docs
 
 -include $(subdirs:=/rules.make)
 
@@ -49,6 +49,9 @@ lwlink: lwlink/lwlink$(PROGSUFFIX)
 lwasm: lwasm/lwasm$(PROGSUFFIX)
 lwar: lwar/lwar$(PROGSUFFIX)
 lwobjdump: lwlink/lwobjdump$(PROGSUFFIX)
+
+.PHONY: lwbasic
+lwbasic: lwbasic/lwbasic$(PROGSUFFIX)
 
 lwasm/lwasm$(PROGSUFFIX): $(lwasm_objs) lwlib lwasm/rules.make
 	@echo Linking $@
@@ -98,7 +101,7 @@ extra_clean := $(extra_clean) *~ */*~
 	
 
 .PHONY: clean
-clean:
+clean: $(cleantargs)
 	@echo "Cleaning up"
 	@rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
 	@rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
@@ -106,7 +109,7 @@ clean:
 	@rm -f */*.exe
 
 .PHONY: realclean
-realclean: clean
+realclean: clean $(realcleantargs)
 	@echo "Cleaning up even more"
 	@rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
 	@rm -f docs/manual/*.html docs/manual/*.pdf
