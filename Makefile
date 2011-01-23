@@ -28,7 +28,7 @@ MAIN_TARGETS := lwasm/lwasm$(PROGSUFFIX) \
 .PHONY: all
 all: $(MAIN_TARGETS)
 
-subdirs := lwasm lwlink lwar lwlib
+subdirs := lwasm lwlink lwar lwlib docs
 
 -include $(subdirs:=/rules.make)
 
@@ -103,6 +103,11 @@ clean:
 	@rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
 	@rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
 	@rm -f $(extra_clean)
+
+.PHONY: realclean
+realclean: clean
+	@echo "Cleaning up even more"
+	@rm -f docs/manual/*.html docs/manual/*.pdf
 
 print-%:
 	@echo $* = $($*)

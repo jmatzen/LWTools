@@ -9,3 +9,5 @@ lwasm
 lwar
 lwlink
 lwobjdump
+*.html
+*.pdf
