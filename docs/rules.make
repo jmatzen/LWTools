@@ -13,10 +13,10 @@ manual-htmlm: $(dirname)/manual/index.html
 manual-pdf: $(dirname)/manual/manual.pdf
 
 $(dirname)/manual/manual.html: $(dirname)/manual.docbook.sgml
-	docbook2html -u $(dirname)/manual.docbook.sgml && mv manual.docbook.html $(dirname)/manual/manual.html
+	docbook2html -o $(dirname) -u $(dirname)/manual.docbook.sgml && mv $(dirname)/manual.docbook.html $(dirname)/manual/manual.html
 
 $(dirname)/manual/index.html: $(dirname)/manual.docbook.sgml
 	docbook2html -o $(dirname)/manual $(dirname)manual.docbook.sgml
 
 $(dirname)/manual/manual.pdf: $(dirname)/manual.docbook.sgml
-	docbook2pdf -u $(dirname)manual.docbook.sgml && mv manual.docbook.pdf $(dirname)/manual/manual.pdf
+	docbook2pdf -o $(dirname) -u $(dirname)manual.docbook.sgml && mv $(dirname)/manual.docbook.pdf $(dirname)/manual/manual.pdf && rm -f $(dirname)/manual.docbook.html
