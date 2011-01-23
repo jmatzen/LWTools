@@ -1,5 +1,5 @@
 /*
-lw_alloc.c
+lw_realloc.c
 
 Copyright © 2010 William Astle
 
@@ -24,11 +24,22 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #define ___lw_alloc_c_seen___
 #include "lw_alloc.h"
 
-void *lw_alloc(int size)
+void *lw_realloc(void *P, int S)
 {
 	void *r;
+
+	if (!P)
+	{
+		return lw_alloc(S);
+	}
 	
-	r = malloc(size);
+	if (!S)
+	{
+		lw_free(P);
+		return NULL;
+	}
+	
+	r = realloc(P, S);
 	if (!r)
 	{
 		abort();

@@ -25,12 +25,18 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef ___lw_alloc_c_seen___
 
+#define ___E
+
 #else /* def ___lw_alloc_c_seen___ */
 
-extern void lw_free(void *P);
-extern void *lw_alloc(int S);
-extern void *lw_realloc(void *P, int S);
+#define ___E extern
 
 #endif /* def ___lw_alloc_c_seen___ */
+
+___E void lw_free(void *P);
+___E void *lw_alloc(int S);
+___E void *lw_realloc(void *P, int S);
+
+#undef ___E
 
 #endif /* ___lw_alloc_h_seen___ */
