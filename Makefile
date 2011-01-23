@@ -100,14 +100,15 @@ extra_clean := $(extra_clean) *~ */*~
 .PHONY: clean
 clean:
 	@echo "Cleaning up"
-	@rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
 	@rm -f lwlib/liblw.a lwasm/lwasm$(PROGSUFFIX) lwlink/lwlink$(PROGSUFFIX) lwlink/lwobjdump$(PROGSUFFIX) lwar/lwar$(PROGSUFFIX)
 	@rm -f $(lwasm_objs) $(lwlink_objs) $(lwar_objs) $(lwlib_objs) $(lwobjdump_objs)
 	@rm -f $(extra_clean)
+	@rm -f */*.exe
 
 .PHONY: realclean
 realclean: clean
 	@echo "Cleaning up even more"
+	@rm -f $(lwasm_deps) $(lwlink_deps) $(lwar_deps) $(lwlib_deps) $(lwobjdump_deps)
 	@rm -f docs/manual/*.html docs/manual/*.pdf
 
 print-%:
