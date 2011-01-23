@@ -44,7 +44,7 @@ lwar_deps := $(lwar_srcs:.c=.d)
 lwlib_deps := $(lwlib_srcs:.c=.d)
 lwobjdump_deps := $(lwobjdump_srcs:.c=.d)
 
-.PHONY: lwlink lwasm lwar lwobjdump$(PROGSUFFIX)
+.PHONY: lwlink lwasm lwar lwobjdump
 lwlink: lwlink/lwlink$(PROGSUFFIX)
 lwasm: lwasm/lwasm$(PROGSUFFIX)
 lwar: lwar/lwar$(PROGSUFFIX)
@@ -63,13 +63,14 @@ lwlink/lwobjdump$(PROGSUFFIX): $(lwobjdump_objs) lwlib lwlink/rules.make
 	@$(CC) -o $@ $(lwobjdump_objs) $(LDFLAGS)
 
 lwar/lwar$(PROGSUFFIX): $(lwar_objs) lwlib lwar/rules.make
-	@echo Linknig $@
+	@echo Linking $@
 	@$(CC) -o $@ $(lwar_objs) $(LDFLAGS)
 
 test: test.c lwlib
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ test.c $(LDFLAGS)
 
-.PHONY: lwlib
+#.PHONY: lwlib
+.INTERMEDIATE: lwlib
 lwlib: lwlib/liblw.a
 
 lwlib/liblw.a: $(lwlib_objs) lwlib/rules.make
