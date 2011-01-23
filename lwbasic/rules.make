@@ -1,7 +1,7 @@
 dirname := $(dir $(lastword $(MAKEFILE_LIST)))
 lwbasic_dir := $(dirname)
 
-lwbasic_lsrcs := main.c
+lwbasic_lsrcs := main.c input.c
 
 lwbasic_srcs := $(addprefix $(dirname),$(lwbasic_lsrcs))
 lwbasic_objs := $(lwbasic_srcs:.c=.o)

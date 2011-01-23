@@ -32,6 +32,12 @@ typedef struct
 	char *input_file;
 	
 	int debug_level;
+	
+	void *input_state;
 } cstate;
+
+#ifndef __input_c_seen__
+extern int input_getchar(cstate *state);
+#endif
 
 #endif /* __lwbasic_h_seen__ */
