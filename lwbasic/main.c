@@ -25,11 +25,13 @@ main program startup handling for lwbasic
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include <lw_cmdline.h>
 #include <lw_string.h>
 #include <lw_alloc.h>
 
+#define __main_c_seen__
 #include "lwbasic.h"
 
 #define PROGVER "lwbasic from " PACKAGE_STRING
@@ -90,11 +92,26 @@ static struct lw_cmdline_parser cmdline_parser =
 	PROGVER
 };
 
+extern void compiler(cstate *state);
+
 int main(int argc, char **argv)
 {
 	cstate state = { 0 };
 
 	lw_cmdline_parse(&cmdline_parser, argc, argv, 0, 0, &state);
 
+	compiler(&state);
+
 	exit(0);
+}
+
+void lwb_error(const char *fmt, ...)
+{
+	va_list args;
+	
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+	
+	exit(1);
 }

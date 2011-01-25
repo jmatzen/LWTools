@@ -19,6 +19,7 @@ RANLIB := $(BUILDTPREFIX)ranlib
 CPPFLAGS += -I lwlib -DPACKAGE_STRING='"lwtools 4.0-pre"'
 LDFLAGS += -L$(PWD)/lwlib -llw
 
+CFLAGS ?= -g -Wall
 
 MAIN_TARGETS := lwasm/lwasm$(PROGSUFFIX) \
 	lwlink/lwlink$(PROGSUFFIX) \

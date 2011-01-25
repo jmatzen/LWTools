@@ -28,6 +28,7 @@ handle reading input for the rest of the system
 #include <string.h>
 
 #include <lw_alloc.h>
+#include <lw_error.h>
 
 #define __input_c_seen__
 #include "lwbasic.h"
@@ -54,8 +55,7 @@ static void input_init(cstate *state)
 		sp -> fp = fopen(state -> input_file, "rb");
 		if (!(sp -> fp))
 		{
-			fprintf(stderr, "Cannot open input file\n");
-			exit(1);
+			lwb_error("Cannot open input file\n");
 		}
 	}
 	
