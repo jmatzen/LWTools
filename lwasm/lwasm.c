@@ -671,7 +671,7 @@ int lwasm_emitexpr(line_t *l, lw_expr_t expr, int size)
 			if (l -> csect == NULL)
 			{
 				lwasm_register_error(l -> as, l, "Instruction generating output outside of a section");
-				return;
+				return -1;
 			}
 			
 			if (size == 4)
