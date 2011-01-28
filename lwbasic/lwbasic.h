@@ -101,7 +101,7 @@ extern void lexer(cstate *state);
 
 #ifndef __emit_c_seen__
 extern void emit_prolog(cstate *state, int vis, int framesize);
-extern void emit_epilog(cstate *state);
+extern void emit_epilog(cstate *state, int framesize);
 #endif
 
 

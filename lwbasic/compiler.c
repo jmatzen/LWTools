@@ -169,7 +169,7 @@ noparms:
 		}
 	}
 	/* output function/sub epilog */
-	emit_epilog(state);
+	emit_epilog(state, 0);
 	
 	lw_free(state -> currentsub);
 	state -> currentsub = NULL;

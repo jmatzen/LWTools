@@ -41,7 +41,11 @@ void emit_prolog(cstate *state, int vis, int framesize)
 	}
 }
 
-void emit_epilog(cstate *state)
+void emit_epilog(cstate *state, int framesize)
 {
+	if (framesize > 0)
+	{
+		printf("\tleas %d,s\n", framesize);
+	}
 	printf("\trts\n");
 }
