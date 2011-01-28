@@ -55,6 +55,8 @@ typedef struct
 	int parser_state;
 	
 	void *input_state;
+	
+	char *currentsub;
 } cstate;
 
 /* parser states */
@@ -75,6 +77,8 @@ enum
 	token_kw_params,			/* PARAMS keyword */
 	token_kw_returns,			/* RETURNS keyword */
 	token_kw_integer,			/* INTEGER keyword */
+	token_kw_endsub,			/* ENDSUB keyword */
+	token_kw_endfunction,		/* ENDFUNCTION keyword */
 	token_identifier,			/* an identifier (variable, function, etc. */
 	token_char,					/* single character; fallback */
 	token_uint,					/* unsigned integer up to 32 bits */
@@ -94,5 +98,11 @@ extern void lwb_error(const char *fmt, ...);
 #ifndef __lexer_c_seen__
 extern void lexer(cstate *state);
 #endif
+
+#ifndef __emit_c_seen__
+extern void emit_prolog(cstate *state, int vis, int framesize);
+extern void emit_epilog(cstate *state);
+#endif
+
 
 #endif /* __lwbasic_h_seen__ */

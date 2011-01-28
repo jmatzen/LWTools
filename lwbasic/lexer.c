@@ -55,6 +55,9 @@ static struct token_list lexer_global_tokens[] =
 	{ "as",				token_kw_as },
 	{ "params",			token_kw_params },
 	{ "returns",		token_kw_returns },
+	{ "integer",		token_kw_integer },
+	{ "endsub",			token_kw_endsub },
+	{ "endfunction",	token_kw_endfunction },
 	{ NULL }
 };
 
@@ -111,7 +114,7 @@ static void lexer_word(cstate *state)
 	
 	for (;;) {
 		c = lexer_curchar(state);
-		if (c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c >= 0x80)
+		if (c == '_' || (c >= '0' && c <= '9' ) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c >= 0x80)
 		{
 			/* character is part of word */
 			if (wordpos >= wordlen)

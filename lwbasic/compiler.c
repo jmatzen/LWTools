@@ -25,6 +25,9 @@ This is the actual compiler bit; it drives the parser and code generation
 
 #include <stdio.h>
 
+#include <lw_alloc.h>
+#include <lw_string.h>
+
 #include "lwbasic.h"
 
 /* parse a type; the next token will be acquired as a result */
@@ -52,19 +55,22 @@ static int parse_type(cstate *state)
 static void parse_subfunc(cstate *state, int issub)
 {
 	int pt;
-	
+	char *subname;
+	int vis = 0;
+			
 	lexer(state);
 	if (state -> lexer_token != token_identifier)
 	{
 		lwb_error("Invalid sub name '%s'", state -> lexer_token_string);
 	}
 	
-	printf("<name> = %s\n", state -> lexer_token_string);
+	subname = lw_strdup(state -> lexer_token_string);
 	
 	lexer(state);
 	if (state -> lexer_token == token_kw_public || state -> lexer_token == token_kw_private)
 	{
-		printf("<type> = %s\n", state -> lexer_token_string);
+		if (state -> lexer_token == token_kw_public)
+			vis = 1;
 		lexer(state);
 	}
 
@@ -72,13 +78,13 @@ static void parse_subfunc(cstate *state, int issub)
 	if (state -> lexer_token == token_kw_params)
 		lexer(state);
 	
-	if (state -> lexer_token == token_eol)
+	if (state -> lexer_token == token_eol || state -> lexer_token == token_kw_returns)
 		goto noparms;
 
 paramagain:
 	if (state -> lexer_token != token_identifier)
 	{
-		lwb_error("Parameter name expected, get %d, %s\n", state -> lexer_token, state -> lexer_token_string);
+		lwb_error("Parameter name expected, got %d, %s\n", state -> lexer_token, state -> lexer_token_string);
 	}
 	printf("Got <param> = %s\n", state -> lexer_token_string);
 	lexer(state);
@@ -130,6 +136,44 @@ noparms:
 	{
 		lwb_error("EOL expected; found %d, %s\n", state -> lexer_token, state -> lexer_token_string);
 	}
+
+	
+	printf("Sub/Func %s, vis %s\n", subname, vis ? "public" : "private");
+
+	state -> currentsub = subname;
+
+	/* consume EOL */
+	lexer(state);
+	
+	/* variable declarations */
+	/* parse_decls(state); */
+	
+	/* output function/sub prolog */
+	emit_prolog(state, vis, 0);
+	
+	/* parse statement block  */
+	/* parse_statemetns(state); */
+	
+	if (issub)
+	{
+		if (state -> lexer_token != token_kw_endsub)
+		{
+			lwb_error("Expecting ENDSUB, got %d (%s)\n", state -> lexer_token, state -> lexer_token_string);
+		}
+	}
+	else
+	{
+		if (state -> lexer_token != token_kw_endfunction)
+		{
+			lwb_error("Expecting ENDFUNCTION, got %d (%s)\n", state -> lexer_token, state -> lexer_token_string);
+		}
+	}
+	/* output function/sub epilog */
+	emit_epilog(state);
+	
+	lw_free(state -> currentsub);
+	state -> currentsub = NULL;
+	
 }
 
 void compiler(cstate *state)
