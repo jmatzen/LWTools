@@ -1,14 +1,13 @@
-syntax: glob
-*.exe
-*.o
-*.d
-*.a
-*~
-*.orig
-lwasm
-lwar
-lwlink
-lwobjdump
-lwbasic
-*.html
-*.pdf
+\.exe$
+\.o$
+\.d$
+\.a$
+~$
+\.orig$
+\.html$
+\.pdf$
+/lwbasic$
+/lwlink$
+/lwobjdump$
+/lwar$
+/lwasm$
