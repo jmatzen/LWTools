@@ -92,7 +92,7 @@ static struct lw_cmdline_parser cmdline_parser =
 	PROGVER
 };
 
-extern void compiler(cstate *state);
+extern void parser(cstate *state);
 
 int main(int argc, char **argv)
 {
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 
 	lw_cmdline_parse(&cmdline_parser, argc, argv, 0, 0, &state);
 
-	compiler(&state);
+	parser(&state);
 
 	exit(0);
 }

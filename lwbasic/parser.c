@@ -176,7 +176,7 @@ noparms:
 	
 }
 
-void compiler(cstate *state)
+void parser(cstate *state)
 {
 	state -> lexer_curchar = -1;
 	
