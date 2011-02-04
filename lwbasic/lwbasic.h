@@ -97,6 +97,7 @@ extern void lwb_error(const char *fmt, ...);
 
 #ifndef __lexer_c_seen__
 extern void lexer(cstate *state);
+extern char *lexer_return_token(cstate *state);
 #endif
 
 #ifndef __emit_c_seen__

@@ -217,3 +217,25 @@ void lexer(cstate *state)
 	state -> lexer_token = token_char;
 	return;
 }
+
+char *lexer_return_token(cstate *state)
+{
+	static char *buffer = NULL;
+	static int buflen = 0;
+	int l;
+	
+	if (buflen == 0)
+	{
+		buffer = lw_alloc(128);
+		buflen = 128;
+	}
+
+	l = snprintf(buffer, buflen, "%s (%d)", state -> lexer_token_string, state -> lexer_token);
+	if (l >= buflen)
+	{
+		buffer = lw_realloc(buffer, l + 1);
+		buflen = l + 1;
+		snprintf(buffer, buflen, "%s (%d)", state -> lexer_token_string, state -> lexer_token);
+	}
+	return buffer;
+}

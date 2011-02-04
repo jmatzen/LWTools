@@ -84,7 +84,7 @@ static void parse_subfunc(cstate *state, int issub)
 paramagain:
 	if (state -> lexer_token != token_identifier)
 	{
-		lwb_error("Parameter name expected, got %d, %s\n", state -> lexer_token, state -> lexer_token_string);
+		lwb_error("Parameter name expected, got %s\n", lexer_return_token(state));
 	}
 	printf("Got <param> = %s\n", state -> lexer_token_string);
 	lexer(state);
@@ -134,7 +134,7 @@ noparms:
 	
 	if (state -> lexer_token != token_eol)
 	{
-		lwb_error("EOL expected; found %d, %s\n", state -> lexer_token, state -> lexer_token_string);
+		lwb_error("EOL expected; found %s\n", lexer_return_token(state));
 	}
 
 	
@@ -158,14 +158,14 @@ noparms:
 	{
 		if (state -> lexer_token != token_kw_endsub)
 		{
-			lwb_error("Expecting ENDSUB, got %d (%s)\n", state -> lexer_token, state -> lexer_token_string);
+			lwb_error("Expecting ENDSUB, got %s\n", lexer_return_token(state));
 		}
 	}
 	else
 	{
 		if (state -> lexer_token != token_kw_endfunction)
 		{
-			lwb_error("Expecting ENDFUNCTION, got %d (%s)\n", state -> lexer_token, state -> lexer_token_string);
+			lwb_error("Expecting ENDFUNCTION, got %s\n", lexer_return_token(state));
 		}
 	}
 	/* output function/sub epilog */
@@ -206,7 +206,7 @@ void parser(cstate *state)
 			return;
 
 		default:
-			lwb_error("Invalid token %d, %s in global state\n", state -> lexer_token, state -> lexer_token_string);
+			lwb_error("Invalid token '%s' in global state\n", lexer_return_token(state));
 		}
 	}	
 }
