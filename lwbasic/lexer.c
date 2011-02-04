@@ -58,6 +58,7 @@ static struct token_list lexer_global_tokens[] =
 	{ "integer",		token_kw_integer },
 	{ "endsub",			token_kw_endsub },
 	{ "endfunction",	token_kw_endfunction },
+	{ "dim",			token_kw_dim },
 	{ NULL }
 };
 

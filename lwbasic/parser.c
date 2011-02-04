@@ -62,10 +62,48 @@ static int parse_type(cstate *state)
 static void parse_decls(cstate *state)
 {
 	/* declarations */
-	switch (state -> lexer_token)
+	/* the first thing that doesn't look like a declaration is assumed */
+	/* to be a statement and will trigger a bailout */
+	int vt;
+	char *vn;
+	symtab_entry_t *se;
+	
+	for (;;)
 	{
-	default:
-		return;
+		switch (state -> lexer_token)
+		{
+		/* DIM keyword */
+		case token_kw_dim:
+			lexer(state);
+			if (state -> lexer_token != token_identifier)
+			{
+				lwb_error("Expecting identifier, got %s\n", lexer_return_token(state));
+			}
+			vn = lw_strdup(state -> lexer_token_string);
+			lexer(state);
+			if (state -> lexer_token != token_kw_as)
+			{
+				lwb_error("Expecting AS, got %s\n", lexer_return_token(state));
+			}
+			lexer(state);
+			vt = parse_type(state);
+			
+			se = symtab_find(state -> local_syms, vn);
+			if (se)
+			{
+				lwb_error("Multiply defined local variable %s", vn);
+			}
+			state -> framesize += sizeof_type(vt);
+			symtab_register(state -> local_syms, vn, -(state -> framesize), symtype_var, NULL);
+			
+			lw_free(vn);
+			break;
+		default:
+			return;
+		}
+		if (state -> lexer_token != token_eol)
+			lwb_error("Expecting end of line; got %s", lexer_return_token(state));
+		lexer(state);
 	}
 }
 

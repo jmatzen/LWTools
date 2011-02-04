@@ -85,6 +85,7 @@ enum
 	token_kw_integer,			/* INTEGER keyword */
 	token_kw_endsub,			/* ENDSUB keyword */
 	token_kw_endfunction,		/* ENDFUNCTION keyword */
+	token_kw_dim,				/* DIM keyword */
 	token_identifier,			/* an identifier (variable, function, etc. */
 	token_char,					/* single character; fallback */
 	token_uint,					/* unsigned integer up to 32 bits */
