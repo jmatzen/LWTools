@@ -28,6 +28,8 @@ definitions used throughout lwbasic
 
 #include <stdint.h>
 
+#include "symtab.h"
+
 /* note: integer and uinteger will be the same for positive values from 0
 through 0x7FFFFFFF; the unsigned type should be used for doing ascii
 conversions and then if a negative value was discovered, it should be
@@ -57,6 +59,10 @@ typedef struct
 	void *input_state;
 	
 	char *currentsub;
+	symtab_t *global_syms;
+	symtab_t *local_syms;
+	int returntype;
+	int framesize;
 } cstate;
 
 /* parser states */
@@ -87,6 +93,15 @@ enum
 	token_eof					/* end of file */
 };
 
+/* symbol types */
+enum
+{
+	symtype_sub,				/* "sub" (void function) */
+	symtype_func,				/* function (nonvoid) */
+	symtype_param,				/* function parameter */
+	symtype_var					/* variable */
+};
+
 #ifndef __input_c_seen__
 extern int input_getchar(cstate *state);
 #endif
@@ -101,8 +116,8 @@ extern char *lexer_return_token(cstate *state);
 #endif
 
 #ifndef __emit_c_seen__
-extern void emit_prolog(cstate *state, int vis, int framesize);
-extern void emit_epilog(cstate *state, int framesize);
+extern void emit_prolog(cstate *state, int vis);
+extern void emit_epilog(cstate *state);
 #endif
 
 

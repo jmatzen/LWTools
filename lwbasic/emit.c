@@ -28,24 +28,24 @@ This is the actual compiler bit; it drives the parser and code generation
 #define __emit_c_seen__
 #include "lwbasic.h"
 
-void emit_prolog(cstate *state, int vis, int framesize)
+void emit_prolog(cstate *state, int vis)
 {
 	if (vis)
 	{
 		printf("\texport _%s\n", state -> currentsub);
 	}
 	printf("_%s\n", state -> currentsub);
-	if (framesize > 0)
+	if (state -> framesize > 0)
 	{
-		printf("\tleas %d,s\n", -framesize);
+		printf("\tleas %d,s\n", -(state -> framesize));
 	}
 }
 
-void emit_epilog(cstate *state, int framesize)
+void emit_epilog(cstate *state)
 {
-	if (framesize > 0)
+	if (state -> framesize > 0)
 	{
-		printf("\tleas %d,s\n", framesize);
+		printf("\tleas %d,s\n", state -> framesize);
 	}
 	printf("\trts\n");
 }

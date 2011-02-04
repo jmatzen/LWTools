@@ -50,6 +50,7 @@ void symtab_destroy(symtab_t *st)
 		se = st -> head;
 		st -> head = se -> next;
 		lw_free(se -> name);
+		lw_free(se -> privdata);
 		lw_free(se);
 	}
 	lw_free(st);
@@ -67,7 +68,7 @@ symtab_entry_t *symtab_find(symtab_t *st, char *name)
 	return NULL;
 }
 
-void symtab_register(symtab_t *st, char *name, int addr, int symtype)
+void symtab_register(symtab_t *st, char *name, int addr, int symtype, void *privdata)
 {
 	symtab_entry_t *se;
 	
@@ -75,6 +76,7 @@ void symtab_register(symtab_t *st, char *name, int addr, int symtype)
 	se -> name = lw_strdup(name);
 	se -> addr = addr;
 	se -> symtype = symtype;
+	se -> privdata = privdata;
 	se -> next = st -> head;
 	st -> head = se;
 }

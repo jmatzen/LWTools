@@ -29,6 +29,15 @@ This is the actual compiler bit; it drives the parser and code generation
 #include <lw_string.h>
 
 #include "lwbasic.h"
+#include "symtab.h"
+
+
+/* size of a type */
+static int sizeof_type(int type)
+{
+	/* everything is an "int" right now; 2 bytes */
+	return 2;
+}
 
 /* parse a type; the next token will be acquired as a result */
 /* the token advancement is to provide consistency */
@@ -50,14 +59,30 @@ static int parse_type(cstate *state)
 	return pt;
 }
 
+static void parse_decls(cstate *state)
+{
+	/* declarations */
+	switch (state -> lexer_token)
+	{
+	default:
+		return;
+	}
+}
+
 
 /* issub means RETURNS is not allowed; !issub means RETURNS is required */
+
 static void parse_subfunc(cstate *state, int issub)
 {
-	int pt;
-	char *subname;
+	int pt, rt;
+	char *subname, *pn;
 	int vis = 0;
-			
+	symtab_entry_t *se;
+	int paramsize = 0;
+	
+	state -> local_syms = symtab_init();
+	state -> framesize = 0;
+	
 	lexer(state);
 	if (state -> lexer_token != token_identifier)
 	{
@@ -86,7 +111,7 @@ paramagain:
 	{
 		lwb_error("Parameter name expected, got %s\n", lexer_return_token(state));
 	}
-	printf("Got <param> = %s\n", state -> lexer_token_string);
+	pn = lw_strdup(state -> lexer_token_string);
 	lexer(state);
 	
 	if (state -> lexer_token != token_kw_as)
@@ -94,7 +119,15 @@ paramagain:
 	lexer(state);
 	
 	pt = parse_type(state);
-	printf("Got <type> = %d\n", pt);
+
+	se = symtab_find(state -> local_syms, pn);
+	if (se)
+	{
+		lwb_error("Duplicate parameter name %s\n", pn);
+	}
+	symtab_register(state -> local_syms, pn, paramsize, symtype_param, NULL);
+	paramsize += sizeof_type(pt);
+	lw_free(pn);
 	
 	if (state -> lexer_token == token_char && state -> lexer_token_string[0] == ',')
 	{
@@ -102,26 +135,26 @@ paramagain:
 		goto paramagain;
 	}
 
-noparms:	
+noparms:
+	rt = -1;
 	if (!issub)
 	{
-		int rt;
-		
 		if (state -> lexer_token != token_kw_returns)
 		{
 			lwb_error("FUNCTION must have RETURNS\n");
 		}
 		lexer(state);
-		if (state -> lexer_token == token_identifier)
+/*		if (state -> lexer_token == token_identifier)
 		{
 			printf("Return value named: %s\n", state -> lexer_token_string);
+			
 			lexer(state);
 			if (state -> lexer_token != token_kw_as)
 				lwb_error("Execting AS after RETURNS");
 			lexer(state);
 		}
+*/
 		rt = parse_type(state);
-		printf("Return type: %d\n", rt);
 	}
 	else
 	{
@@ -138,21 +171,27 @@ noparms:
 	}
 
 	
-	printf("Sub/Func %s, vis %s\n", subname, vis ? "public" : "private");
+	se = symtab_find(state -> global_syms, subname);
+	if (se)
+	{
+		lwb_error("Multiply defined symbol %s\n", subname);
+	}
+
+	symtab_register(state -> global_syms, subname, -1, issub ? symtype_sub : symtype_func, NULL);
 
 	state -> currentsub = subname;
-
+	state -> returntype = rt;
 	/* consume EOL */
 	lexer(state);
 	
 	/* variable declarations */
-	/* parse_decls(state); */
+	parse_decls(state);
 	
 	/* output function/sub prolog */
-	emit_prolog(state, vis, 0);
+	emit_prolog(state, vis);
 	
 	/* parse statement block  */
-	/* parse_statemetns(state); */
+	/* parse_statements(state); */
 	
 	if (issub)
 	{
@@ -169,17 +208,19 @@ noparms:
 		}
 	}
 	/* output function/sub epilog */
-	emit_epilog(state, 0);
+	emit_epilog(state);
 	
 	lw_free(state -> currentsub);
 	state -> currentsub = NULL;
-	
+	symtab_destroy(state -> local_syms);
+	state -> local_syms = NULL;
 }
 
 void parser(cstate *state)
 {
 	state -> lexer_curchar = -1;
-	
+	state -> global_syms = symtab_init();
+		
 	/* now look for a global declaration */
 	for (;;)
 	{

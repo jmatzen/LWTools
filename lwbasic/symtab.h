@@ -42,7 +42,7 @@ struct symtab_entry_s
 	char *name;				/* name of the symbol */
 	int addr;				/* address of symbol */
 	int symtype;			/* type of symbol */
-	
+	void *privdata;			/* random data associated with symbol */	
 	symtab_entry_t *next;	/* next in the list */
 };
 
@@ -54,7 +54,7 @@ typedef struct symtab_s
 __E symtab_t *symtab_init(void);
 __E void symtab_destroy(symtab_t *st);
 __E symtab_entry_t *symtab_find(symtab_t *st, char *name);
-__E void symtab_register(symtab_t *st, char *name, int addr, int symtype);
+__E void symtab_register(symtab_t *st, char *name, int addr, int symtype, void *data);
 
 #undef __E
 
