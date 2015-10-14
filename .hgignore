@@ -1,0 +1,20 @@
+\.exe$
+\.o$
+\.d$
+\.a$
+~$
+\.orig$
+/lwbasic$
+/lwlink$
+/lwobjdump$
+/lwar$
+/lwasm$
+/lwcc/lwcc$
+/lwcc/lwcpp$
+
+# for windows
+\.suo$
+\.sdf$
+\.opensdf$
+\Debug$
+\Release$
