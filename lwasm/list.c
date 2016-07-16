@@ -307,3 +307,6 @@ void do_list(asmstate_t *as)
 	if ((as -> flags & FLAG_SYMBOLS))
 		list_symbols(as, of);
 }
+
+void do_chip_audit(asmstate_t *as){	line_t *cl, *nl;	FILE *of = NULL;
+	if (!(as -> flags & FLAG_AUDIT))		return;	if (as -> audit_file)	{		if (strcmp(as -> audit_file, "-") == 0)		{			of = stdout;		}		else			of = fopen(as -> audit_file, "w");	}	else	{		of = stdout;	}	if (!of)	{		fprintf(stderr, "Cannot open audit file; feature list not generated\n");		return;	}	for (cl = as -> line_head; cl; cl = nl)	{		nl = cl -> next;		int flags = instab[cl -> insn].flags;		if (flags & lwasm_insn_is6309)		{			if (flags & lwasm_insn_used) continue;			instab[cl -> insn].flags |= lwasm_insn_used;			fprintf(of, "%s\n", instab[cl -> insn].opcode);		}	}}

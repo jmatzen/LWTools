@@ -354,6 +354,22 @@ is specified, the list will not include the symbol table.
 </varlistentry>
 
 <varlistentry>
+<term><option>--audit[=file]</option></term>
+<term><option>-a[file]</option></term>
+<listitem>
+<para>
+Cause LWASM to generate an audit file which lists a summary of all the opcodes
+used in the assembled program. It is useful for verifying compatibility between
+apps and emulators.
+</para>
+<para>
+If <option>file</option> is specified, the listing will go to that file. Otherwise 
+it will go to the standard output stream. By default, no audit file is generated.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term><option>--symbols</option></term>
 <term><option>-s</option></term>
 <listitem>
