@@ -104,6 +104,7 @@ enum lwasm_pragmas_e
 	PRAGMA_6809CONV				= 1 << 22,	// enable 6809 convenience ops
 	PRAGMA_6309CONV				= 1 << 23,	// enable 6309 convenience ops
 	PRAGMA_NEWSOURCE			= 1 << 24,	// don't use compatibility source format
+	PRAGMA_EMUEXT				= 1 << 25,  // enable emulator extensions
 	PRAGMA_CLEARBIT				= 1 << 31	// reserved to indicate negated pragma flag status
 };
 

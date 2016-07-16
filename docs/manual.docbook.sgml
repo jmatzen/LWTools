@@ -1736,6 +1736,14 @@ instruction sets respectively. For more information, see
 </listitem>
 </varlistentry>
 
+<varlistentry>
+<term>emuext</term>
+<listitem>
+<para>
+This pragma enables generation of the LOG (0x103E) and BREAK (0x113E) opcodes used in various 6x09 emulators such as MAME.
+</para>
+</listitem>
+</varlistentry>
 
 <varlistentry>
 <term>index0tonone</term>
