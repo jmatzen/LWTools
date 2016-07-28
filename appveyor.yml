@@ -1,0 +1,22 @@
+version: build.{build}
+
+branches:
+  only:
+    - master
+
+os: Visual Studio 2015
+
+platform: x64
+configuration: Release
+
+clone_folder: c:\projects\src
+
+build:
+  project: c:\projects\src\build\LWTools.sln
+
+# scripts to run before build
+before_build:
+  - md c:\projects\src\build
+  - cd c:\projects\src\build
+  - cmake -G "Visual Studio 14 2015 Win64" ..
+
